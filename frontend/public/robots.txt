@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# domain swapped at build time (scripts/prerender-meta.mts)
+Sitemap: https://elsayedhassanauto.com/sitemap.xml

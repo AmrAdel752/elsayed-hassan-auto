@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="dark scroll-smooth overflow-x-clip">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>السيد حسن أوتو | El Sayed Hassan Auto</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg">
+<link rel="apple-touch-icon" href="logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+  // apply saved theme/lang before paint
+  try{
+    const t=localStorage.getItem('sha-theme'), l=localStorage.getItem('sha-lang');
+    if(t==='light') document.documentElement.classList.remove('dark');
+    if(l==='en'){document.documentElement.lang='en';document.documentElement.dir='ltr';}
+  }catch(e){}
+</script>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={
+  darkMode:'class',
+  theme:{extend:{
+    colors:{
+      brand:{red:'#dc2f36',red2:'#f2474d',gold:'#e8b84a',gold2:'#f7d77c',dgold:'#a8761c'},
+      ink:{900:'#08080a',800:'#0f0f13',700:'#141418',600:'#26262d'}
+    },
+    fontFamily:{sans:['Cairo','sans-serif']},
+    keyframes:{
+      marquee:{to:{transform:'translateX(50%)'}},
+      marqueeL:{to:{transform:'translateX(-50%)'}},
+      float:{'50%':{transform:'translateY(-14px)'}},
+      ping2:{'0%':{boxShadow:'0 0 0 0 rgba(37,211,102,.6)'},'100%':{boxShadow:'0 0 0 22px rgba(37,211,102,0)'}}
+    },
+    animation:{
+      marquee:'marquee 30s linear infinite', marqueeL:'marqueeL 30s linear infinite',
+      float:'float 6s ease-in-out infinite', spin40:'spin 40s linear infinite',
+      spin70:'spin 70s linear infinite reverse', ping2:'ping2 2s infinite'
+    }
+  }}
+}
+</script>
+<style type="text/tailwindcss">
+  @layer components{
+    .btn{@apply inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full font-bold text-base transition duration-300 hover:-translate-y-1}
+    .btn svg{@apply w-5 h-5}
+    .btn-red{@apply bg-gradient-to-br from-brand-red2 to-brand-red text-white shadow-[0_10px_30px_-8px_rgba(220,47,54,.7)] hover:shadow-[0_16px_40px_-8px_rgba(220,47,54,.9)]}
+    .btn-ghost{@apply border-[1.5px] border-brand-dgold/50 text-brand-dgold bg-brand-gold/5 hover:bg-brand-gold/15 dark:border-brand-gold/50 dark:text-brand-gold2}
+    .gold-text{@apply bg-gradient-to-b from-[#d9a336] via-brand-dgold to-[#7a5410] bg-clip-text text-transparent dark:from-brand-gold2 dark:via-brand-gold dark:to-[#b8862a]}
+    .muted{@apply text-zinc-600 dark:text-zinc-400}
+    .card{@apply rounded-[20px] border border-zinc-200 bg-white shadow-[0_10px_30px_-18px_rgba(0,0,0,.25)] dark:border-ink-600 dark:bg-gradient-to-br dark:from-ink-700 dark:to-ink-800 dark:shadow-none}
+    .tag{@apply inline-block text-brand-red2 font-extrabold tracking-[2px] text-sm mb-2.5}
+    .h2{@apply text-[clamp(30px,4vw,46px)] font-black leading-snug mb-3}
+    .ic-red{@apply grid place-items-center bg-gradient-to-br from-brand-red2 to-[#a01f26] text-white shadow-[0_12px_30px_-10px_rgba(220,47,54,.8)]}
+    .icon-btn{@apply h-11 min-w-11 px-3 rounded-full grid place-items-center border border-zinc-300 dark:border-ink-600 bg-white/60 dark:bg-white/5 font-bold text-sm hover:border-brand-red2 transition}
+    .field{@apply w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none transition focus:border-brand-red2 focus:ring-4 focus:ring-brand-red/15 dark:border-ink-600 dark:bg-ink-900 dark:[color-scheme:dark]}
+    .lbl{@apply block text-sm font-bold mb-1.5}
+  }
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  #loader.done{opacity:0;visibility:hidden}
+  #loader.done img{transform:scale(1.3)}
+</style>
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-900 dark:bg-ink-900 dark:text-zinc-100 leading-relaxed overflow-x-clip transition-colors duration-300">
+
+<!-- preloader -->
+<div id="loader" class="fixed inset-0 z-[100] grid place-items-center bg-zinc-50 dark:bg-ink-900 transition-all duration-700">
+  <div class="absolute inset-0 bg-[radial-gradient(500px_300px_at_50%_50%,rgba(220,47,54,.25),transparent_70%)]"></div>
+  <div class="relative w-44 h-44">
+    <div class="absolute -inset-3 rounded-full border-4 border-brand-red/15 border-t-brand-red2 animate-spin"></div>
+    <div class="absolute -inset-6 rounded-full border border-brand-gold/30 border-b-brand-gold animate-[spin_2s_linear_infinite_reverse]"></div>
+    <img src="logo.jpg" alt="" class="w-full h-full rounded-full shadow-[0_0_60px_rgba(220,47,54,.5)] transition-transform duration-700">
+  </div>
+</div>
+
+<!-- icon sprite -->
+<svg width="0" height="0" class="absolute"><defs>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 14.4c-.3-.1-1.8-.9-2-1s-.5-.1-.7.1-.8 1-1 1.2-.4.2-.7.1a8 8 0 0 1-4-3.5c-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5l-1-2.2c-.2-.6-.5-.5-.7-.5h-.6a1.1 1.1 0 0 0-.8.4 3.4 3.4 0 0 0-1 2.5 5.9 5.9 0 0 0 1.2 3.1c.2.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7a2.9 2.9 0 0 0 1.9-1.3 2.4 2.4 0 0 0 .2-1.3c-.1-.2-.3-.2-.6-.4zM12 21.8a9.8 9.8 0 0 1-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8zM20.5 3.5A11.9 11.9 0 0 0 1.8 17.8L.1 24l6.3-1.7A11.9 11.9 0 0 0 24 12a11.8 11.8 0 0 0-3.5-8.5z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></g></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g></symbol>
+  <symbol id="i-engine" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></g></symbol>
+  <symbol id="i-susp" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></g></symbol>
+  <symbol id="i-ac" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2v20M4.9 4.9l14.2 14.2M2 12h20M4.9 19.1 19.1 4.9M9 3l3 3 3-3M9 21l3-3 3 3"/></symbol>
+  <symbol id="i-parts" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="7"/></g></symbol>
+  <symbol id="i-oil" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.7s-6 6.4-6 11a6 6 0 0 0 12 0c0-4.6-6-11-6-11z"/><path d="M9 15a3 3 0 0 0 3 3"/></g></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></g></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></g></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1.5"/></g></symbol>
+  <symbol id="i-fb" viewBox="0 0 24 24"><path fill="currentColor" d="M14 9V7c0-1 .5-1.5 1.5-1.5H17V2h-3c-3 0-4 2-4 4.5V9H7.5v3.5H10V22h4v-9.5h2.8L17 9z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c.5 5.5 4.5 9.5 10 10-5.5.5-9.5 4.5-10 10-.5-5.5-4.5-9.5-10-10 5.5-.5 9.5-4.5 10-10z"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h11l3 5h2v5h-2"/><path d="M9 17h6M5 12h14"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></g></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+</defs></svg>
+
+<!-- top bar -->
+<div class="bg-gradient-to-r from-brand-red to-[#a3232a] text-white text-[13px] py-2">
+  <div class="mx-auto w-[min(1200px,100%-32px)] flex justify-between gap-3 flex-wrap">
+    <span class="inline-flex items-center gap-2"><svg class="w-4 h-4 shrink-0"><use href="#i-clock"/></svg><span data-i="top1"></span></span>
+    <span class="inline-flex items-center gap-2"><svg class="w-4 h-4 shrink-0"><use href="#i-pin"/></svg><span data-i="top2"></span></span>
+  </div>
+</div>
+
+<!-- nav -->
+<nav class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-ink-900/80 border-b border-zinc-200 dark:border-ink-600">
+  <div class="mx-auto w-[min(1200px,100%-32px)] h-[78px] flex items-center justify-between gap-4">
+    <a href="#" class="flex items-center gap-3">
+      <img src="logo.jpg" alt="" class="w-[54px] h-[54px] rounded-full ring-2 ring-brand-red shadow-[0_0_20px_rgba(220,47,54,.5)]">
+      <div><b class="block text-[19px] leading-tight"><span data-i="b1"></span> <span class="text-brand-red2" data-i="b2"></span></b><small class="muted text-xs tracking-wider">EL SAYED HASSAN AUTO</small></div>
+    </a>
+    <div class="hidden lg:flex gap-8 font-semibold text-[15px] text-zinc-600 dark:text-zinc-300">
+      <a href="#" class="relative text-zinc-900 dark:text-white after:absolute after:inset-x-0 after:-bottom-2 after:h-0.5 after:bg-brand-red2 after:rounded" data-i="n1"></a>
+      <a href="#services" class="hover:text-brand-red2" data-i="n2"></a>
+      <a href="#why" class="hover:text-brand-red2" data-i="n3"></a>
+      <a href="#steps" class="hover:text-brand-red2" data-i="n4"></a>
+      <a href="#contact" class="hover:text-brand-red2" data-i="n5"></a>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="langBtn" class="icon-btn" aria-label="Language">EN</button>
+      <button id="themeBtn" class="icon-btn" aria-label="Theme"><svg class="w-5 h-5 hidden dark:block"><use href="#i-sun"/></svg><svg class="w-5 h-5 dark:hidden"><use href="#i-moon"/></svg></button>
+      <a class="btn btn-red hidden sm:inline-flex !py-2.5 !px-5" href="https://wa.me/201080941711" target="_blank"><svg><use href="#i-wa"/></svg><span data-i="bookNow"></span></a>
+    </div>
+  </div>
+</nav>
+
+<!-- hero -->
+<header class="relative py-14 md:py-24 pb-28 overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(700px_400px_at_20%_40%,rgba(220,47,54,.18),transparent_70%),radial-gradient(600px_400px_at_90%_10%,rgba(232,184,74,.1),transparent_70%)]"></div>
+  <div class="absolute inset-0 bg-[linear-gradient(rgba(127,127,127,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(127,127,127,.08)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,#000_30%,transparent_75%)]"></div>
+  <div class="relative z-10 mx-auto w-[min(1200px,100%-32px)] grid lg:grid-cols-[1.15fr_.85fr] gap-12 items-center">
+    <div class="reveal">
+      <div class="relative inline-flex items-center gap-3 ps-1.5 pe-5 py-1.5 mb-6 rounded-2xl bg-white/80 dark:bg-white/[.04] border border-zinc-200 dark:border-white/10 backdrop-blur shadow-[0_10px_30px_-14px_rgba(220,47,54,.6)]">
+        <span class="ic-red w-11 h-11 rounded-xl"><svg class="w-5 h-5"><use href="#i-engine"/></svg></span>
+        <span class="leading-tight"><b class="block text-[15px] font-extrabold" data-i="badge"></b><small class="block text-xs font-semibold text-brand-red2" data-i="badgeSub"></small></span>
+        <span class="absolute -top-1 -end-1 w-3 h-3 rounded-full bg-brand-red2 ring-4 ring-brand-red2/20 animate-pulse"></span>
+      </div>
+      <h1 class="text-[clamp(38px,5.5vw,68px)] font-black leading-[1.2] mb-5" data-i="h1"></h1>
+      <p class="muted text-lg md:text-[19px] max-w-[560px] mb-9" data-i="lead"></p>
+      <div class="flex gap-3.5 flex-wrap mb-12">
+        <a class="btn btn-red rtl:flex-row-reverse" href="https://wa.me/201080941711" target="_blank"><svg><use href="#i-wa"/></svg><span data-i="ctaWa"></span></a>
+        <a class="btn btn-ghost rtl:flex-row-reverse" href="tel:01080941711"><svg><use href="#i-phone"/></svg><span dir="ltr">01080941711</span></a>
+      </div>
+      <div class="flex gap-10 flex-wrap">
+        <div><b class="gold-text block text-[32px] font-black leading-none" dir="ltr" data-count="100" data-suffix="%">0%</b><span class="muted text-sm" data-i="s1"></span></div>
+        <div><b class="gold-text block text-[32px] font-black leading-none" dir="ltr" data-count="7" data-suffix="/7">0/7</b><span class="muted text-sm" data-i="s2"></span></div>
+        <div><b class="gold-text block text-[32px] font-black leading-none" dir="ltr" data-count="12" data-suffix="">0</b><span class="muted text-sm" data-i="s3"></span></div>
+      </div>
+    </div>
+    <div class="reveal relative aspect-square w-full max-w-[460px] mx-auto" style="transition-delay:.2s">
+      <div class="absolute -inset-7 rounded-full border border-brand-gold/25 animate-spin70"></div>
+      <div class="absolute inset-0 rounded-full border-2 border-dashed border-brand-red/45 animate-spin40"></div>
+      <div class="absolute inset-[12%] rounded-full bg-[radial-gradient(circle,rgba(220,47,54,.55),transparent_70%)] blur-3xl"></div>
+      <img src="logo.jpg" alt="" class="absolute inset-[8%] w-[84%] rounded-full shadow-[0_30px_80px_-20px_rgba(0,0,0,.8)] animate-float">
+      <div class="card !rounded-2xl absolute top-[6%] -start-2 lg:start-[-6%] z-10 flex items-center gap-2.5 px-4 py-3 text-sm font-bold backdrop-blur">
+        <div class="w-9 h-9 rounded-xl grid place-items-center bg-brand-red/15 text-brand-red2"><svg class="w-5 h-5"><use href="#i-shield"/></svg></div>
+        <div><span data-i="c1t"></span><small class="muted block font-medium text-xs" data-i="c1s"></small></div>
+      </div>
+      <div class="card !rounded-2xl absolute bottom-[8%] -end-2 lg:end-[-8%] z-10 flex items-center gap-2.5 px-4 py-3 text-sm font-bold backdrop-blur">
+        <div class="w-9 h-9 rounded-xl grid place-items-center bg-brand-gold/15 text-brand-dgold dark:text-brand-gold"><svg class="w-5 h-5"><use href="#i-cpu"/></svg></div>
+        <div><span data-i="c2t"></span><small class="muted block font-medium text-xs" data-i="c2s"></small></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- marquee -->
+<div class="relative z-10 -mt-8 -mx-5 -rotate-[1.5deg] bg-brand-red text-white py-4 overflow-hidden shadow-[0_20px_40px_-20px_rgba(220,47,54,.7)]">
+  <div id="marquee" class="flex gap-12 whitespace-nowrap font-extrabold text-xl rtl:animate-marquee ltr:animate-marqueeL"></div>
+</div>
+
+<!-- services -->
+<section id="services" class="py-24 md:py-28">
+  <div class="mx-auto w-[min(1200px,100%-32px)]">
+    <div class="reveal text-center max-w-[680px] mx-auto mb-14">
+      <span class="tag" data-i="svTag"></span><h2 class="h2" data-i="svH"></h2><p class="muted text-[17px]" data-i="svP"></p>
+    </div>
+    <div id="services-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </div>
+</section>
+
+<!-- why -->
+<section id="why" class="py-24 md:py-28 bg-gradient-to-b from-zinc-50 via-zinc-100 to-zinc-50 dark:from-ink-900 dark:via-ink-800 dark:to-ink-900">
+  <div class="mx-auto w-[min(1200px,100%-32px)] grid lg:grid-cols-2 gap-14 items-center">
+    <div class="reveal">
+      <span class="tag" data-i="whTag"></span><h2 class="h2 mb-6" data-i="whH"></h2>
+      <div id="feats"></div>
+    </div>
+    <div class="reveal relative rounded-[28px] p-10 md:p-12 overflow-hidden border border-brand-red/30 bg-gradient-to-br from-[#2a0709] to-ink-800 text-white dark:from-[#1a0607] dark:to-ink-800">
+      <span class="absolute -bottom-8 -start-2 text-[130px] font-black tracking-[6px] text-white/[.04] font-[Arial]">NISSAN</span>
+      <div class="relative inline-flex items-center gap-3 ps-1.5 pe-5 py-1.5 mb-6 rounded-2xl bg-white/[.06] border border-white/10 backdrop-blur">
+        <span class="ic-red w-11 h-11 rounded-xl"><svg class="w-6 h-6"><use href="#i-car"/></svg></span>
+        <span class="leading-tight"><b class="block text-[15px] font-extrabold" data-i="nsBadge"></b><small class="block text-xs font-semibold text-[#ff9599]" data-i="nsSub"></small></span>
+      </div>
+      <h3 class="text-3xl font-black leading-snug mb-3.5" data-i="nsH"></h3>
+      <p class="text-zinc-400 mb-7" data-i="nsP"></p>
+      <div class="relative flex flex-wrap gap-2.5 font-[Arial] text-sm font-bold tracking-wide">
+        <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">SUNNY</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">SENTRA</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">QASHQAI</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">X-TRAIL</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">JUKE</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">TIIDA</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">PATROL</span><span class="px-4 py-2 rounded-full bg-white/5 border border-white/10">KICKS</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- steps -->
+<section id="steps" class="py-24 md:py-28">
+  <div class="mx-auto w-[min(1200px,100%-32px)] grid lg:grid-cols-[.9fr_1.1fr] gap-12 items-center">
+    <div class="reveal">
+      <span class="tag" data-i="stTag"></span><h2 class="h2" data-i="stH"></h2><p class="muted text-[17px] mb-8" data-i="stP"></p>
+      <ol id="steps-grid" class="space-y-6"></ol>
+    </div>
+    <form id="bookForm" class="reveal card relative overflow-hidden p-6 md:p-9 space-y-4" style="transition-delay:.15s">
+      <div class="absolute -top-24 -end-24 w-60 h-60 rounded-full bg-brand-red/20 blur-3xl pointer-events-none"></div>
+      <div class="relative flex items-center gap-3 mb-2">
+        <div class="ic-red w-12 h-12 rounded-2xl"><svg class="w-6 h-6"><use href="#i-cal"/></svg></div>
+        <h3 class="text-2xl font-black" data-i="fmH"></h3>
+      </div>
+      <div class="relative grid sm:grid-cols-2 gap-4">
+        <label><span class="lbl" data-i="fName"></span><input name="name" required class="field" data-ph="phName"></label>
+        <label><span class="lbl" data-i="fModel"></span><select name="model" required class="field" id="selModel"></select></label>
+        <label><span class="lbl" data-i="fService"></span><select name="service" required class="field" id="selService"></select></label>
+        <label><span class="lbl" data-i="fDate"></span><input name="date" type="date" required class="field" id="bkDate"></label>
+      </div>
+      <label class="relative block"><span class="lbl" data-i="fNotes"></span><textarea name="notes" rows="3" class="field resize-none" data-ph="phNotes"></textarea></label>
+      <button type="submit" class="btn btn-red relative w-full justify-center !py-4 text-lg"><svg><use href="#i-wa"/></svg><span data-i="fSubmit"></span></button>
+      <p class="relative muted text-xs text-center" data-i="fHint"></p>
+    </form>
+  </div>
+</section>
+
+<!-- reviews -->
+<section class="py-24 md:py-28 bg-gradient-to-b from-zinc-50 via-zinc-100 to-zinc-50 dark:from-ink-900 dark:via-ink-800 dark:to-ink-900">
+  <div class="mx-auto w-[min(1200px,100%-32px)]">
+    <div class="reveal text-center max-w-[680px] mx-auto mb-14"><span class="tag" data-i="rvTag"></span><h2 class="h2" data-i="rvH"></h2></div>
+    <div id="reviews" class="grid md:grid-cols-3 gap-5"></div>
+  </div>
+</section>
+
+<!-- contact -->
+<section id="contact" class="py-24 md:py-28">
+  <div class="mx-auto w-[min(1200px,100%-32px)]">
+    <div class="reveal text-center max-w-[680px] mx-auto mb-14"><span class="tag" data-i="ctTag"></span><h2 class="h2" data-i="ctH"></h2></div>
+    <div class="reveal card !rounded-[28px] overflow-hidden grid lg:grid-cols-[1fr_1.2fr]">
+      <div class="p-6 md:p-11">
+        <h3 class="text-[28px] font-black mb-6" data-i="ctInfo"></h3>
+        <div class="flex gap-4 mb-5"><div class="shrink-0 w-12 h-12 rounded-xl grid place-items-center bg-brand-red/10 text-brand-red2"><svg class="w-[22px] h-[22px]"><use href="#i-pin"/></svg></div><div><small class="muted block text-[13px]" data-i="addrL"></small><b class="text-[17px]" data-i="addr"></b></div></div>
+        <div class="flex gap-4 mb-5"><div class="shrink-0 w-12 h-12 rounded-xl grid place-items-center bg-brand-red/10 text-brand-red2"><svg class="w-[22px] h-[22px]"><use href="#i-wa"/></svg></div><div><small class="muted block text-[13px]" data-i="waL"></small><b class="text-[17px] inline-block" dir="ltr">0108 094 1711</b></div></div>
+        <div class="flex gap-4 mb-5"><div class="shrink-0 w-12 h-12 rounded-xl grid place-items-center bg-brand-red/10 text-brand-red2"><svg class="w-[22px] h-[22px]"><use href="#i-phone"/></svg></div><div><small class="muted block text-[13px]" data-i="phL"></small><b class="text-[17px] inline-block" dir="ltr">0114 360 461</b></div></div>
+        <div class="flex gap-4 mb-6"><div class="shrink-0 w-12 h-12 rounded-xl grid place-items-center bg-brand-red/10 text-brand-red2"><svg class="w-[22px] h-[22px]"><use href="#i-clock"/></svg></div><div><small class="muted block text-[13px]" data-i="hrL"></small><b class="text-[17px]" data-i="hours"></b><br>
+          <span class="inline-flex items-center gap-2 mt-1.5 px-3.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[13px] font-bold"><i class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></i><span data-i="openNow"></span></span></div></div>
+        <a class="btn btn-red" href="https://maps.app.goo.gl/oyDR7KsLevVQA5rG9" target="_blank"><svg><use href="#i-pin"/></svg><span data-i="openMap"></span></a>
+      </div>
+      <div class="relative min-h-[420px]">
+        <iframe loading="lazy" class="absolute inset-0 w-full h-full border-0 dark:[filter:grayscale(1)_invert(.92)_contrast(.9)_hue-rotate(180deg)]" src="https://maps.google.com/maps?q=%D8%A3%D8%A8%D8%B1%D8%A7%D8%AC%20%D8%A7%D9%84%D9%81%D9%88%D8%B1%20%D8%B3%D9%8A%D8%B2%D9%88%D9%86%20%D8%A7%D9%84%D9%85%D8%B1%D9%8A%D9%88%D8%B7%D9%8A%D8%A9%20%D9%81%D9%8A%D8%B5%D9%84&z=15&output=embed"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- final cta -->
+<div class="pb-24 md:pb-28"><div class="mx-auto w-[min(1200px,100%-32px)]">
+  <div class="reveal relative rounded-[32px] px-6 py-16 md:py-[70px] text-center overflow-hidden bg-gradient-to-br from-[#c4252c] to-[#741419] text-white">
+    <div class="absolute inset-0 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,.04)_0_2px,transparent_2px_22px)]"></div>
+    <h2 class="relative text-[clamp(28px,4vw,46px)] font-black mb-2.5" data-i="fH"></h2>
+    <p class="relative opacity-85 text-lg mb-8" data-i="fP"></p>
+    <a class="btn relative bg-white text-brand-red" href="https://wa.me/201080941711" target="_blank"><svg><use href="#i-wa"/></svg><span data-i="fBtn"></span></a>
+  </div>
+</div></div>
+
+<!-- footer -->
+<footer class="border-t border-zinc-200 dark:border-ink-600 bg-white dark:bg-ink-800 pt-16 pb-7">
+  <div class="mx-auto w-[min(1200px,100%-32px)]">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 mb-10">
+      <div>
+        <a href="#" class="flex items-center gap-3"><img src="logo.jpg" alt="" class="w-[54px] h-[54px] rounded-full ring-2 ring-brand-red"><div><b class="block text-[19px] leading-tight"><span data-i="b1"></span> <span class="text-brand-red2" data-i="b2"></span></b><small class="muted text-xs tracking-wider">EL SAYED HASSAN AUTO</small></div></a>
+        <p class="muted text-[15px] mt-4 max-w-[300px]" data-i="about"></p>
+        <div class="flex gap-2.5 mt-5">
+          <a href="https://www.facebook.com/share/1C9Sm9a72Q/" target="_blank" aria-label="Facebook" class="icon-btn !w-11 hover:!bg-brand-red hover:text-white"><svg class="w-[18px] h-[18px]"><use href="#i-fb"/></svg></a>
+          <a href="https://wa.me/201080941711" target="_blank" aria-label="WhatsApp" class="icon-btn !w-11 hover:!bg-brand-red hover:text-white"><svg class="w-[18px] h-[18px]"><use href="#i-wa"/></svg></a>
+          <a href="https://maps.app.goo.gl/oyDR7KsLevVQA5rG9" target="_blank" aria-label="Location" class="icon-btn !w-11 hover:!bg-brand-red hover:text-white"><svg class="w-[18px] h-[18px]"><use href="#i-pin"/></svg></a>
+        </div>
+      </div>
+      <div><h5 class="text-[17px] font-extrabold mb-4" data-i="fsv"></h5><ul id="f-services" class="muted text-[15px] space-y-2.5"></ul></div>
+      <div><h5 class="text-[17px] font-extrabold mb-4" data-i="fl"></h5><ul class="muted text-[15px] space-y-2.5">
+        <li><a href="#" class="hover:text-brand-red2" data-i="n1"></a></li><li><a href="#why" class="hover:text-brand-red2" data-i="n3"></a></li><li><a href="#steps" class="hover:text-brand-red2" data-i="n4"></a></li><li><a href="#contact" class="hover:text-brand-red2" data-i="n5"></a></li>
+      </ul></div>
+      <div><h5 class="text-[17px] font-extrabold mb-4" data-i="hrL"></h5><ul class="muted text-[15px] space-y-2.5">
+        <li data-i="days"></li>
+        <li><span class="gold-text font-extrabold inline-block" dir="ltr">10:00 AM — 10:00 PM</span></li>
+        <li><a href="tel:01080941711" class="inline-flex items-center gap-2 hover:text-brand-red2"><svg class="w-4 h-4"><use href="#i-phone"/></svg><span dir="ltr">01080941711</span></a></li>
+      </ul></div>
+    </div>
+    <div class="border-t border-zinc-200 dark:border-ink-600 pt-5 flex justify-between flex-wrap gap-2.5 muted text-sm">
+      <span data-i="rights"></span><span data-i="badge"></span>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/201080941711" target="_blank" aria-label="WhatsApp" class="fixed bottom-6 start-6 z-[60] w-[62px] h-[62px] rounded-full grid place-items-center bg-[#25d366] text-white animate-ping2"><svg class="w-8 h-8"><use href="#i-wa"/></svg></a>
+
+<script src="i18n.js"></script>
+</body>
+</html>

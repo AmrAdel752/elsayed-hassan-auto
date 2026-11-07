@@ -1,0 +1,190 @@
+<app-page-banner [title]="i.t('book.title')" [subtitle]="i.t('book.sub')" icon="cal" [crumbs]="[{ label: i.t('nav.book') }]" />
+
+<section class="py-5 md:py-20">
+  @if (step() < 5) {
+    <div class="wrap grid lg:grid-cols-[1fr_340px] gap-8 items-start">
+      <div class="card p-4 sm:p-5 md:p-9">
+        <!-- stepper -->
+        <ol class="flex items-center mb-3 sm:mb-10">
+          @for (s of i.dict().book.steps; track $index; let n = $index, last = $last) {
+            <li class="flex items-center" [class.flex-1]="!last">
+              <button type="button" (click)="n < step() && go(n)" [disabled]="n >= step()"
+                      class="flex flex-col items-center gap-1.5 shrink-0 disabled:cursor-default">
+                <span class="w-10 h-10 md:w-11 md:h-11 rounded-full grid place-items-center font-black text-sm border-2 transition"
+                      [class]="n < step() ? 'bg-brand-red border-brand-red text-white' : n === step() ? 'border-brand-red text-brand-red2 shadow-[0_0_0_6px_rgba(220,47,54,.15)]' : 'border-zinc-300 dark:border-ink-600 muted'">
+                  @if (n < step()) { <app-icon name="check" class="w-5 h-5" /> } @else { {{ n + 1 }} }
+                </span>
+                <span class="text-xs font-bold hidden sm:block" [class.muted]="n > step()">{{ s }}</span>
+              </button>
+              @if (!last) { <span class="flex-1 h-0.5 mx-2 sm:-mt-5 rounded" [class]="n < step() ? 'bg-brand-red' : 'bg-zinc-200 dark:bg-ink-600'"></span> }
+            </li>
+          }
+        </ol>
+        <!-- phones hide the step labels, so name the current step here -->
+        <p class="sm:hidden text-center text-xs font-bold muted mb-6">
+          <span class="text-brand-red2" dir="ltr">{{ step() + 1 }}/5</span> — {{ i.dict().book.steps[step()] }}
+        </p>
+
+        <!-- step 1: car -->
+        @if (step() === 0) {
+          <h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6">{{ i.t('book.car.h') }}</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-6 sm:mb-8">
+            @for (m of models; track m) {
+              <button type="button" (click)="model.set(m)"
+                      class="relative rounded-2xl border-2 p-4 text-center transition hover:border-brand-red/60"
+                      [class]="model() === m ? 'border-brand-red bg-brand-red/5' : 'border-zinc-200 dark:border-ink-600'">
+                <app-icon name="car" class="w-9 h-9 mx-auto mb-2" [class]="model() === m ? 'text-brand-red2' : 'muted'" />
+                <b class="block font-[Arial] tracking-wide text-sm">{{ m.toUpperCase() }}</b>
+                @if (model() === m) { <span class="absolute top-2 end-2 w-5 h-5 rounded-full grid place-items-center bg-brand-red text-white"><app-icon name="check" class="w-3 h-3" /></span> }
+              </button>
+            }
+            <button type="button" (click)="model.set(i.t('common.other'))"
+                    class="rounded-2xl border-2 border-dashed p-4 font-bold transition hover:border-brand-red/60"
+                    [class]="model() === i.t('common.other') ? 'border-brand-red bg-brand-red/5 text-brand-red2' : 'border-zinc-300 dark:border-ink-600 muted'">{{ i.t('common.other') }}</button>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label><span class="lbl">{{ i.t('book.car.year') }}</span>
+              <select class="field" [ngModel]="year()" (ngModelChange)="year.set(+$event)">@for (y of years; track y) { <option [value]="y">{{ y }}</option> }</select></label>
+            <label><span class="lbl">{{ i.t('book.car.km') }}</span>
+              <input class="field" type="number" min="0" dir="ltr" [placeholder]="i.t('book.car.phKm')" [ngModel]="km()" (ngModelChange)="km.set($event)"></label>
+          </div>
+        }
+
+        <!-- step 2: services -->
+        @if (step() === 1) {
+          <h2 class="text-xl md:text-2xl font-black">{{ i.t('book.svc.h') }}</h2>
+          <p class="muted text-sm md:text-base mb-4 md:mb-6">{{ i.t('book.svc.sub') }}</p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            @for (s of i.dict().services; track s.slug) {
+              @let on = picked().includes(s.slug);
+              <button type="button" (click)="toggle(s.slug)"
+                      class="flex items-center gap-4 rounded-2xl border-2 p-4 text-start transition hover:border-brand-red/60"
+                      [class]="on ? 'border-brand-red bg-brand-red/5' : 'border-zinc-200 dark:border-ink-600'">
+                <span class="w-12 h-12 shrink-0 rounded-xl grid place-items-center" [class]="on ? 'ic-red' : 'bg-zinc-100 dark:bg-white/5 muted'"><app-icon [name]="s.icon" class="w-6 h-6" /></span>
+                <span class="flex-1"><b class="block">{{ s.t }}</b><small class="muted line-clamp-1">{{ s.d }}</small></span>
+                <span class="w-6 h-6 shrink-0 rounded-md border-2 grid place-items-center" [class]="on ? 'bg-brand-red border-brand-red text-white' : 'border-zinc-300 dark:border-ink-600'">
+                  @if (on) { <app-icon name="check" class="w-4 h-4" /> }
+                </span>
+              </button>
+            }
+          </div>
+        }
+
+        <!-- step 3: date & time -->
+        @if (step() === 2) {
+          <h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6">{{ i.t('book.time.h') }}</h2>
+          <span class="lbl">{{ i.t('book.time.day') }}</span>
+          <div class="flex gap-2.5 overflow-x-auto pb-3 mb-6 -mx-1 px-1 snap-x">
+            @for (d of days(); track d.iso) {
+              <button type="button" (click)="pickDay(d.iso)"
+                      class="snap-start shrink-0 w-[78px] rounded-2xl border-2 py-3 text-center transition hover:border-brand-red/60"
+                      [class]="date() === d.iso ? 'border-brand-red bg-gradient-to-b from-brand-red2 to-brand-red text-white' : 'border-zinc-200 dark:border-ink-600'">
+                <small class="block text-xs font-bold opacity-80">{{ d.label }}</small>
+                <b class="block text-2xl font-black leading-tight">{{ d.d }}</b>
+                <small class="block text-xs opacity-70">{{ d.wd }}</small>
+              </button>
+            }
+          </div>
+          @if (date()) {
+            <span class="lbl">{{ i.t('book.time.slot') }}</span>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+              @for (h of hours; track h) {
+                @let b = busy(date(), h);
+                <button type="button" [disabled]="b" (click)="hour.set(h)" dir="ltr"
+                        class="rounded-xl border-2 py-3 font-bold text-sm transition enabled:hover:border-brand-red/60 disabled:opacity-40 disabled:line-through disabled:cursor-not-allowed"
+                        [class]="hour() === h ? 'border-brand-red bg-brand-red text-white' : 'border-zinc-200 dark:border-ink-600'">
+                  {{ fmtHour(h) }}
+                </button>
+              }
+            </div>
+          }
+        }
+
+        <!-- step 4: contact -->
+        @if (step() === 3) {
+          <h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6">{{ i.t('book.info.h') }}</h2>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label><span class="lbl">{{ i.t('book.info.name') }}</span>
+              <input class="field" [placeholder]="i.t('book.info.phName')" [ngModel]="name()" (ngModelChange)="name.set($event)"></label>
+            <label><span class="lbl">{{ i.t('book.info.phone') }}</span>
+              <input class="field" type="tel" dir="ltr" placeholder="01xxxxxxxxx" maxlength="11" [ngModel]="phone()" (ngModelChange)="phone.set($event)">
+              @if (phone() && !phoneOk()) { <small class="text-brand-red2 text-xs font-bold mt-1 block">{{ i.t('book.info.badPhone') }}</small> }
+            </label>
+          </div>
+          <label class="block mt-4"><span class="lbl">{{ i.t('book.info.notes') }}</span>
+            <textarea class="field resize-none" rows="4" [placeholder]="i.t('book.info.phNotes')" [ngModel]="notes()" (ngModelChange)="notes.set($event)"></textarea></label>
+        }
+
+        <!-- step 5: review -->
+        @if (step() === 4) {
+          <h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6">{{ i.t('book.review.h') }}</h2>
+          <div class="space-y-3">
+            @for (r of [
+              { icon: 'car', k: 'car', v: 'Nissan ' + model() + ' ' + year() + (km() ? ' — ' + km() + ' km' : ''), s: 0 },
+              { icon: 'engine', k: 'services', v: serviceNames().join(' • '), s: 1 },
+              { icon: 'clock', k: 'when', v: when(), s: 2 },
+              { icon: 'phone', k: 'contact', v: name() + ' — ' + phone(), s: 3 }
+            ]; track r.k) {
+              <div class="flex items-center gap-4 rounded-2xl border border-zinc-200 dark:border-ink-600 p-4">
+                <span class="w-11 h-11 shrink-0 rounded-xl grid place-items-center bg-brand-red/10 text-brand-red2"><app-icon [name]="r.icon" class="w-5 h-5" /></span>
+                <div class="flex-1 min-w-0"><small class="muted block text-xs">{{ i.t('book.review.' + r.k) }}</small><b class="block truncate">{{ r.v }}</b></div>
+                <button type="button" (click)="go(r.s)" class="text-sm font-bold text-brand-dgold dark:text-brand-gold hover:underline">{{ i.t('book.review.edit') }}</button>
+              </div>
+            }
+            @if (notes()) { <p class="muted text-sm px-1">{{ notes() }}</p> }
+          </div>
+        }
+
+        <!-- nav -->
+        <!-- phones: sticks above the bottom tab bar so Next is always in reach -->
+        <div class="sticky lg:static z-10 bottom-[calc(76px+env(safe-area-inset-bottom))] -mx-4 sm:-mx-5 md:mx-0 px-4 sm:px-5 md:px-0 py-3 lg:py-0 mt-6 md:mt-10 lg:pt-6 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-ink-600 bg-white/95 dark:bg-ink-700/95 backdrop-blur lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none rounded-b-[20px] lg:rounded-none">
+          @if (step() > 0) {
+            <button type="button" (click)="go(step() - 1)" class="btn !px-4 md:!px-5 !py-3 md:!py-3.5 border border-zinc-300 dark:border-ink-600">
+              <app-icon name="arrow" class="w-5 h-5 ltr:rotate-180" />{{ i.t('book.back') }}</button>
+          } @else { <span></span> }
+          @if (step() < 4) {
+            <button type="button" (click)="go(step() + 1)" [disabled]="!canNext()" class="btn btn-red flex-1 sm:flex-none justify-center !py-3 md:!py-3.5 disabled:opacity-40 disabled:pointer-events-none">
+              {{ i.t('book.next') }}<app-icon name="arrow" class="w-5 h-5 rtl:rotate-180" /></button>
+          } @else {
+            <button type="button" (click)="confirm()" class="btn btn-red flex-1 sm:flex-none justify-center !py-3 md:!py-3.5"><app-icon name="check" class="w-5 h-5" />{{ i.t('book.confirm') }}</button>
+          }
+        </div>
+      </div>
+
+      <!-- live summary -->
+      <aside class="card p-6 lg:sticky lg:top-28 hidden lg:block">
+        <h3 class="text-lg font-black mb-5 flex items-center gap-2"><app-icon name="tag" class="w-5 h-5 text-brand-red2" />{{ i.t('book.summary') }}</h3>
+        @for (r of [
+          { k: 'car', v: model() ? 'Nissan ' + model() + ' ' + year() : '' },
+          { k: 'services', v: serviceNames().join(' • ') },
+          { k: 'when', v: when() },
+          { k: 'contact', v: name() }
+        ]; track r.k) {
+          <div class="py-3 border-b last:border-0 border-zinc-200 dark:border-ink-600">
+            <small class="muted block text-xs">{{ i.t('book.review.' + r.k) }}</small>
+            <b class="block text-[15px]" [class.muted]="!r.v" [class.font-medium]="!r.v">{{ r.v || i.t('book.empty') }}</b>
+          </div>
+        }
+      </aside>
+    </div>
+  } @else {
+    <!-- success -->
+    <div class="wrap max-w-[620px] text-center">
+      <div class="card p-8 md:p-12 relative overflow-hidden">
+        <div class="absolute -top-24 inset-x-0 mx-auto w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl"></div>
+        <div class="relative w-24 h-24 mx-auto mb-6 rounded-full grid place-items-center bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-[0_15px_40px_-10px_rgba(16,185,129,.7)]">
+          <app-icon name="check" class="w-12 h-12" />
+        </div>
+        <h2 class="relative text-3xl md:text-4xl font-black mb-3">{{ i.t('book.done.h') }}</h2>
+        <small class="relative muted block">{{ i.t('book.done.code') }}</small>
+        <b class="relative block text-3xl font-black tracking-widest gold-text my-2" dir="ltr">{{ code() }}</b>
+        <p class="relative muted mb-8">{{ i.t('book.done.p') }}</p>
+        <div class="relative flex flex-wrap justify-center gap-3">
+          <a [href]="waUrl()" target="_blank" class="btn bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,.7)]"><app-icon name="wa" class="w-5 h-5" />{{ i.t('book.done.wa') }}</a>
+          <a routerLink="/track" [queryParams]="{ code: code() }" class="btn btn-ghost"><app-icon name="search" class="w-5 h-5" />{{ i.t('book.done.track') }}</a>
+          <button type="button" (click)="reset()" class="btn border border-zinc-300 dark:border-ink-600">{{ i.t('book.done.again') }}</button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

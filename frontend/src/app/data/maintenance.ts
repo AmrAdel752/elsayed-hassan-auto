@@ -14,7 +14,7 @@ export interface MaintItem {
 }
 
 /** Models that commonly ship with a CVT gearbox in Egypt. */
-export const CVT_MODELS = ['Sentra', 'Qashqai', 'X-Trail', 'Juke', 'Kicks'];
+export const CVT_MODELS = ['Sentra', 'Qashqai', 'X-Trail', 'Juke', 'Kicks', 'Magnite'];
 
 export const MAINT_ITEMS: MaintItem[] = [
   { id: 'oil', icon: 'oil', every: 10000, severe: 5000, name: { ar: 'تغيير زيت الموتور', en: 'Engine oil change' } },

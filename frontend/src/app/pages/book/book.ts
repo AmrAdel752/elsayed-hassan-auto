@@ -4,17 +4,18 @@ import { I18n } from '../../core/i18n.service';
 import { SITE, waLink } from '../../core/site';
 import { PageBanner } from '../../shared/page-banner';
 import { Icon } from '../../shared/icon';
-import { RouterLink } from '@angular/router';
-import { saveBooking } from '../../data/tracking';
+import { saveBooking, savedInSlot } from '../../data/tracking';
 
-interface Day { iso: string; label: string; wd: string; d: number; }
+interface Day { iso: string; label: string; wd: string; d: number; full: boolean; }
 
 const OPEN = 10, CLOSE = 22;
+/** Max cars per time slot; a slot with this many bookings is closed. */
+const CAP = 3;
 const pad = (n: number) => String(n).padStart(2, '0');
 
 @Component({
   selector: 'app-book',
-  imports: [FormsModule, RouterLink, PageBanner, Icon],
+  imports: [FormsModule, PageBanner, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './book.html',
 })
@@ -23,6 +24,9 @@ export class Book implements OnInit {
   protected readonly models = SITE.models;
   protected readonly years = Array.from({ length: 22 }, (_, k) => 2026 - k);
   protected readonly hours = Array.from({ length: CLOSE - OPEN }, (_, k) => OPEN + k);
+  /** Slots grouped as morning / afternoon / evening. */
+  protected readonly groups = [this.hours.filter(h => h < 12), this.hours.filter(h => h >= 12 && h < 17), this.hours.filter(h => h >= 17)];
+  protected readonly generations = SITE.generations;
 
   /** Optional `?service=slug` from a service page, preselected in step 2. */
   readonly service = input<string>();
@@ -32,6 +36,7 @@ export class Book implements OnInit {
   protected readonly step = signal(0);
   protected readonly model = signal('');
   protected readonly year = signal(2020);
+  protected readonly gen = signal('');
   protected readonly km = signal('');
   protected readonly picked = signal<string[]>([]);
   protected readonly date = signal('');
@@ -54,14 +59,18 @@ export class Book implements OnInit {
     const loc = this.i.isAr() ? 'ar-EG-u-nu-latn' : 'en-GB', out: Day[] = [];
     for (let k = 0; k < 14; k++) {
       const d = new Date(); d.setDate(d.getDate() + k);
+      const iso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
       out.push({
-        iso: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+        iso, full: this.hours.every(h => this.left(iso, h) === 0),
         label: k === 0 ? this.i.t('book.time.today') : k === 1 ? this.i.t('book.time.tomorrow') : d.toLocaleDateString(loc, { weekday: 'short' }),
         wd: d.toLocaleDateString(loc, { month: 'short' }), d: d.getDate(),
       });
     }
     return out;
   });
+
+  /** Model + generation, e.g. "Sunny N16". */
+  protected readonly car = computed(() => this.model() + (this.gen() ? ' ' + this.gen() : ''));
 
   protected readonly serviceNames = computed(() =>
     this.i.dict().services.filter(s => this.picked().includes(s.slug)).map(s => s.t));
@@ -80,13 +89,19 @@ export class Book implements OnInit {
     if (s && this.i.dict().services.some(x => x.slug === s)) this.picked.set([s]);
   }
 
-  /** Mock availability until the API exists: past hours today + a stable pseudo-random set are "booked". */
-  protected busy(iso: string, h: number) {
-    const now = new Date();
-    if (iso === this.days()[0].iso && h <= now.getHours()) return true;
-    const seed = [...iso].reduce((a, c) => a + c.charCodeAt(0), 0) + h * 7;
-    return seed % 5 === 0;
+  /**
+   * Free places left in a slot (0 = closed). Until the API exists: past hours today are closed,
+   * a stable pseudo-random number of slots are already taken, plus bookings made in this browser.
+   */
+  protected left(iso: string, h: number) {
+    const now = new Date(), today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    if (iso === today && h <= now.getHours()) return 0;
+    const seed = [...iso].reduce((a, c) => a * 31 + c.charCodeAt(0), 0) + h * 5;
+    const mock = [0, 1, 0, 2, 0, 3, 1, 0, 0][Math.abs(seed) % 9];
+    return Math.max(0, CAP - mock - savedInSlot(iso, h));
   }
+
+  protected pickModel(m: string) { if (m !== this.model()) { this.model.set(m); this.gen.set(''); } }
 
   protected fmtHour(h: number) {
     const ar = this.i.isAr(), h12 = h % 12 || 12;
@@ -107,20 +122,22 @@ export class Book implements OnInit {
 
   protected confirm() {
     this.code.set(`SHA-${Math.floor(10000 + Math.random() * 90000)}`);
-    saveBooking({ code: this.code(), model: this.model(), year: this.year(), services: this.picked() });
+    saveBooking({ code: this.code(), model: this.car(), year: this.year(), services: this.picked(), date: this.date(), hour: this.hour()! });
+    // the booking only reaches the shop once the customer sends it on WhatsApp, so open it right away
+    window.open(this.waUrl(), '_blank');
     this.step.set(5);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   protected waUrl() {
     return waLink(this.i.dict().book.msg({
-      code: this.code(), name: this.name(), phone: this.phone(), model: this.model(), year: this.year(),
+      code: this.code(), name: this.name(), phone: this.phone(), model: this.car(), year: this.year(),
       km: this.km(), services: this.serviceNames().join(this.i.isAr() ? '، ' : ', '), when: this.when(), notes: this.notes(),
     }));
   }
 
   protected reset() {
-    this.step.set(0); this.model.set(''); this.km.set(''); this.picked.set([]); this.date.set('');
+    this.step.set(0); this.model.set(''); this.gen.set(''); this.km.set(''); this.picked.set([]); this.date.set('');
     this.hour.set(null); this.name.set(''); this.phone.set(''); this.notes.set(''); this.code.set('');
   }
 }

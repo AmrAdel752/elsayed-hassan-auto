@@ -30,7 +30,7 @@ export const JOBS: Job[] = [
 
 /** Bigger cars cost more in parts and labor. */
 export const MODEL_FACTOR: Record<string, number> = {
-  Sunny: 1, Tiida: 1, Sentra: 1.15, Juke: 1.15, Kicks: 1.1, Qashqai: 1.3, 'X-Trail': 1.35, Patrol: 1.8,
+  Sunny: 1, Tiida: 1, Sentra: 1.15, Juke: 1.15, Kicks: 1.1, Qashqai: 1.3, 'X-Trail': 1.35, Patrol: 1.8, Magnite: 1.05,
 };
 
 /** Approved alternative parts are cheaper than genuine. */

@@ -79,3 +79,16 @@
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* ---------- dropdowns ---------- */
+/* own chevron instead of the browser arrow, placed at the end side in both RTL and LTR */
+select.field {
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  padding-inline-end: 2.75rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2f36' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-size: 18px; background-position: right 14px center;
+}
+select.field:dir(rtl) { background-position: left 14px center; }
+select.field:hover { border-color: color-mix(in srgb, var(--color-brand-red2) 50%, transparent); }
+select.field option { background: #fff; color: #18181b; }
+.dark select.field option { background: var(--color-ink-800); color: #f4f4f5; }

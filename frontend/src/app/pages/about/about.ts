@@ -36,9 +36,9 @@ import { CountUp } from '../../shared/count-up.directive';
 
     <!-- stats -->
     <section class="pb-12 md:pb-28">
-      <div class="wrap grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+      <div class="wrap grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
         @for (s of stats; track $index; let n = $index) {
-          <div [reveal]="n * .1" class="card p-5 md:p-7 text-center">
+          <div [reveal]="n * .1" class="card p-5 md:p-7 text-center first:col-span-2 lg:first:col-span-1 first:border-brand-gold/60 first:bg-brand-gold/10 dark:first:from-brand-gold/10 dark:first:to-transparent">
             <b class="gold-text block text-4xl md:text-5xl font-black leading-none mb-2 md:mb-3" dir="ltr" [countUp]="s.n" [suffix]="s.s"></b>
             <span class="muted font-bold">{{ i.dict().about.stats[n] }}</span>
           </div>
@@ -101,5 +101,5 @@ import { CountUp } from '../../shared/count-up.directive';
 })
 export class About {
   protected readonly i = inject(I18n);
-  protected readonly stats = [{ n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }, { n: SITE.models.length, s: '+' }];
+  protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }, { n: SITE.models.length, s: '+' }];
 }

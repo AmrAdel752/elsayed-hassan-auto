@@ -9,6 +9,8 @@ export type Stage = typeof STAGES[number];
 
 export interface Job {
   code: string; model: string; year: number; services: string[];
+  /** Appointment day (YYYY-MM-DD) and hour, used to count bookings per slot. */
+  date?: string; hour?: number;
   stage: number;
   /** ISO time each reached stage was completed/started, index-aligned with STAGES. */
   times: string[];
@@ -48,4 +50,12 @@ export function findJob(code: string): Job | undefined {
   let saved: Job[] = [];
   try { saved = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch {}
   return [...saved, ...MOCK].find(j => j.code === c);
+}
+
+/** Bookings saved in this browser for a given day + hour (the API will count all customers later). */
+export function savedInSlot(date: string, hour: number): number {
+  try {
+    const all: Job[] = JSON.parse(localStorage.getItem(KEY) || '[]');
+    return all.filter(j => j.date === date && j.hour === hour).length;
+  } catch { return 0; }
 }

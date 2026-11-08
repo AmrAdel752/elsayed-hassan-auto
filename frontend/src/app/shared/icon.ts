@@ -31,6 +31,9 @@ const ICONS: Record<string, string> = {
   check: S('<path d="M20 6 9 17l-5-5"/>'),
   search: S('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
   gift: S('<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>'),
+  tire: S('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v5M12 16v5M3 12h5M16 12h5"/>'),
+  wash: S('<path d="M7 3c-1.5 2-2.5 3.5-2.5 5a2.5 2.5 0 0 0 5 0C9.5 6.5 8.5 5 7 3zM17 3c-1.5 2-2.5 3.5-2.5 5a2.5 2.5 0 0 0 5 0c0-1.5-1-3-2.5-5z"/><path d="M3 17l2-4h14l2 4v3H3z"/><path d="M7 20v1M17 20v1"/>'),
+  paint: S('<rect x="3" y="3" width="14" height="6" rx="1.5"/><path d="M17 6h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-7v3"/><rect x="10" y="15" width="4" height="7" rx="1"/>'),
 };
 
 @Component({

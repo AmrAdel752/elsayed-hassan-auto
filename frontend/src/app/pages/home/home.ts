@@ -26,7 +26,7 @@ export class Home {
   protected readonly i = inject(I18n);
   protected readonly site = SITE;
   protected readonly wa = waLink();
-  protected readonly stats = [{ n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }];
+  protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }];
   protected readonly models = SITE.models.map(m => m.toUpperCase());
   protected readonly reviews = REVIEWS.slice(0, 3);
   protected readonly featured = PRODUCTS.filter(p => p.featured).slice(0, 8);

@@ -1,4 +1,5 @@
 using ElSayedHassan.Api.Data;
+using ElSayedHassan.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -22,6 +23,13 @@ builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("db");
 
+// Bookings / slots
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<CairoClock>();
+builder.Services.AddScoped<SlotService>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddAppRateLimits(builder.Configuration);
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -38,6 +46,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(CorsPolicy);
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");

@@ -41,11 +41,11 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 
 ## F — Bookings (most important)
 
-- [ ] **F1** `Booking` entity (Code, Name, Phone, Model, Generation, Year, Km, Services[], Date, Hour, Notes, Status, CreatedAt) + migration
-- [ ] **F2** Slot settings: `Capacity` (3), `OpenHour` (10), `CloseHour` (22) + `ClosedDay` and `ClosedSlot` tables + seed
-- [ ] **F3** `GET /api/slots?from=&days=14` → each day/hour with places left (0 = full/closed/past)
-- [ ] **F4** `POST /api/bookings`: validate (Egyptian phone, date range, open hour), check capacity in a transaction, unique code `SHA-xxxxx`, return code; `409` when the slot just filled
-- [ ] **F5** Rate limiting on `POST /api/bookings` (per IP) + basic spam guard
+- [x] **F1** `Booking` entity (Code, Name, Phone, Model, Generation, Year, Km, Services[], Date, Hour, Notes, Status, CreatedAt) + migration
+- [x] **F2** Slot settings: `Capacity` (3), `OpenHour` (10), `CloseHour` (22) + `ClosedDay` and `ClosedSlot` tables + seed
+- [x] **F3** `GET /api/slots?from=&days=14` → each day/hour with places left (0 = full/closed/past)
+- [x] **F4** `POST /api/bookings`: validate (Egyptian phone, date range, open hour), check capacity in a transaction, unique code `SHA-xxxxx`, return code; `409` when the slot just filled
+- [x] **F5** Rate limiting on `POST /api/bookings` (per IP) + basic spam guard
 - [ ] **F6** Frontend: `environment.ts` `apiUrl`, `BookingApi` service; booking page loads slots from API
 - [ ] **F7** Frontend: confirm = `POST` first, then open WhatsApp with the returned code; on `409` refresh slots + show message
 - [ ] **F8** Frontend: home quick booking form (`shared/sections/booking-form.ts`) also `POST`s before WhatsApp

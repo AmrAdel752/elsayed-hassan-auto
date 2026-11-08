@@ -5,6 +5,11 @@ namespace ElSayedHassan.Api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<SlotSettings> SlotSettings => Set<SlotSettings>();
+    public DbSet<ClosedDay> ClosedDays => Set<ClosedDay>();
+    public DbSet<ClosedSlot> ClosedSlots => Set<ClosedSlot>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

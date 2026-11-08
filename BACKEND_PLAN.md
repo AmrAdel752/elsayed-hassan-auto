@@ -34,10 +34,10 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 
 ## E — Setup
 
-- [ ] **E1** Create `backend/ElSayedHassan.sln` + `ElSayedHassan.Api` (webapi, controllers), `.gitignore`, run it, OpenAPI/Scalar UI works
-- [ ] **E2** Add EF Core SQL Server + `AppDbContext` + connection string (LocalDB for dev) + first migration
-- [ ] **E3** CORS (`http://localhost:4200`, `https://elsayedhassanauto.com`), ProblemDetails errors, `GET /health`
-- [ ] **E4** Shared bits: `Tr` owned type (Ar/En), `BaseEntity` (Id, CreatedAt), folder layout (Entities, Data, Dtos, Controllers, Services)
+- [x] **E1** Create `backend/ElSayedHassan.slnx` + `ElSayedHassan.Api` (webapi, controllers), `.gitignore`, run it, OpenAPI/Scalar UI works
+- [x] **E2** Add EF Core SQL Server + `AppDbContext` + connection string (LocalDB for dev) + first migration
+- [x] **E3** CORS (`http://localhost:4200`, `https://elsayedhassanauto.com`), ProblemDetails errors, `GET /health`
+- [x] **E4** Shared bits: `Tr` owned type (Ar/En), `BaseEntity` (Id, CreatedAt), folder layout (Entities, Data, Dtos, Controllers, Services)
 
 ## F — Bookings (most important)
 

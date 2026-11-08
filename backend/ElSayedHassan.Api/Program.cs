@@ -1,5 +1,7 @@
 using ElSayedHassan.Api.Data;
+using ElSayedHassan.Api.Entities;
 using ElSayedHassan.Api.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -33,6 +35,11 @@ builder.Services.AddScoped<SlotService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddAppRateLimits(builder.Configuration);
 
+// Admin auth: hashed passwords + JWT (Jwt:Key from user-secrets / env var)
+builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
+builder.Services.AddAppJwt(builder.Configuration);
+builder.Services.AddAuthorization();
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -50,9 +57,12 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors(CorsPolicy);
 app.UseRateLimiter();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 app.MapControllers();
+
+await AdminSeeder.SeedOwnerAsync(app.Services);
 
 app.Run();

@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<SlotSettings> SlotSettings => Set<SlotSettings>();
     public DbSet<ClosedDay> ClosedDays => Set<ClosedDay>();
     public DbSet<ClosedSlot> ClosedSlots => Set<ClosedSlot>();
+    public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

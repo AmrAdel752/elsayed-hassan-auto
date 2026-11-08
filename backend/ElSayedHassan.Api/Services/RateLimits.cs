@@ -6,6 +6,7 @@ namespace ElSayedHassan.Api.Services;
 public static class RateLimits
 {
     public const string Bookings = "bookings";
+    public const string Login = "login";
 
     /// <summary>
     /// Per-IP fixed window on POST /api/bookings. Defaults: 5 requests / 10 minutes.
@@ -23,6 +24,16 @@ public static class RateLimits
                 ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = permit, Window = window, QueueLimit = 0 }));
 
+            // brute-force guard on the dashboard login: 10 tries / 15 minutes per IP
+            o.AddPolicy(Login, ctx => RateLimitPartition.GetFixedWindowLimiter(
+                ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = config.GetValue("RateLimit:Login:PermitLimit", 10),
+                    Window = TimeSpan.FromMinutes(config.GetValue("RateLimit:Login:WindowMinutes", 15.0)),
+                    QueueLimit = 0,
+                }));
+
             o.OnRejected = async (ctx, ct) =>
             {
                 if (ctx.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retry))
@@ -36,7 +47,7 @@ public static class RateLimits
                     {
                         Status = StatusCodes.Status429TooManyRequests,
                         Title = "rate_limited",
-                        Detail = "Too many booking attempts. Please try again later.",
+                        Detail = "Too many attempts. Please try again later.",
                     },
                 });
             };

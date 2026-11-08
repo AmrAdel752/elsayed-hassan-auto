@@ -52,8 +52,8 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 
 ## G — Admin login
 
-- [ ] **G1** `AdminUser` entity + password hashing (`PasswordHasher`) + seed owner account from config/user-secrets
-- [ ] **G2** `POST /api/auth/login` → JWT (8h), roles `Owner` / `Staff`
+- [x] **G1** `AdminUser` entity + password hashing (`PasswordHasher`) + seed owner account from config/user-secrets
+- [x] **G2** `POST /api/auth/login` → JWT (8h), roles `Owner` / `Staff`
 - [ ] **G3** `[Authorize]` on `/api/admin/*` + auth in the API docs UI
 - [ ] **G4** Frontend: `/admin/login` page, `AuthService`, token storage, HTTP interceptor, route guard
 - [ ] **G5** Frontend: admin layout (sidebar, top bar, logout), lazy `/admin` routes, `noindex`, skipped by prerender/sitemap

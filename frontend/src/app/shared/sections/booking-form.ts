@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule, NgForm } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { I18n } from '../../core/i18n.service';
 import { SITE, waLink } from '../../core/site';
+import { BookingApi } from '../../core/booking-api';
 import { Icon } from '../icon';
 import { Reveal } from '../reveal.directive';
+
+const OPEN = 10, CLOSE = 22, DAYS_AHEAD = 30;
+const pad = (n: number) => String(n).padStart(2, '0');
+const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 @Component({
   selector: 'app-booking-form',
@@ -33,25 +40,49 @@ import { Reveal } from '../reveal.directive';
           <h3 class="text-2xl font-black">{{ i.t('home.bk.form') }}</h3>
         </div>
         <div class="relative grid sm:grid-cols-2 gap-4">
-          <label><span class="lbl">{{ i.t('home.bk.name') }}</span><input name="name" ngModel required class="field" [placeholder]="i.t('home.bk.phName')"></label>
+          <label><span class="lbl">{{ i.t('home.bk.name') }}</span><input name="name" ngModel required minlength="2" maxlength="100" class="field" [placeholder]="i.t('home.bk.phName')"></label>
+          <label><span class="lbl">{{ i.t('home.bk.phone') }}</span>
+            <input name="phone" ngModel required type="tel" dir="ltr" maxlength="11" pattern="01[0125][0-9]{8}" class="field" placeholder="01xxxxxxxxx" #ph="ngModel">
+            @if (ph.invalid && ph.touched) { <small class="text-brand-red2 text-xs font-bold mt-1 block">{{ i.t('book.info.badPhone') }}</small> }
+          </label>
           <label><span class="lbl">{{ i.t('home.bk.model') }}</span>
             <select name="model" ngModel required class="field">
               <option value="" disabled>{{ i.t('common.choose') }}</option>
-              @for (m of models; track m) { <option>{{ m }}</option> }
-              <option>{{ i.t('common.other') }}</option>
+              @for (m of models; track m) { <option [value]="m">{{ m }}</option> }
+              <option value="Other">{{ i.t('common.other') }}</option>
             </select>
           </label>
           <label><span class="lbl">{{ i.t('home.bk.service') }}</span>
             <select name="service" ngModel required class="field">
               <option value="" disabled>{{ i.t('common.choose') }}</option>
-              @for (s of i.dict().services; track s.slug) { <option>{{ s.t }}</option> }
+              @for (s of i.dict().services; track s.slug) { <option [value]="s.slug">{{ s.t }}</option> }
             </select>
           </label>
-          <label><span class="lbl">{{ i.t('home.bk.date') }}</span><input name="date" type="date" ngModel required [min]="today" class="field"></label>
+          <label><span class="lbl">{{ i.t('home.bk.date') }}</span>
+            <input name="date" type="date" ngModel required [min]="today" [max]="maxDate" class="field" (ngModelChange)="pickDate($event, f)"></label>
+          <label><span class="lbl">{{ i.t('home.bk.time') }}</span>
+            <select name="hour" ngModel required class="field" [disabled]="!date()">
+              <option value="" disabled>{{ !date() ? i.t('home.bk.pickDate') : times().length ? i.t('common.choose') : i.t('home.bk.noTimes') }}</option>
+              @for (t of times(); track t.h) {
+                <option [value]="t.h" [disabled]="t.left === 0">{{ fmtHour(t.h) }}{{ t.left === 0 ? ' — ' + i.t('home.bk.full') : '' }}</option>
+              }
+            </select>
+          </label>
         </div>
         <label class="relative block"><span class="lbl">{{ i.t('home.bk.notes') }}</span>
-          <textarea name="notes" ngModel rows="3" class="field resize-none" [placeholder]="i.t('home.bk.phNotes')"></textarea></label>
-        <button type="submit" class="btn btn-red relative w-full justify-center !py-4 text-lg"><app-icon name="wa" class="w-5 h-5" />{{ i.t('home.bk.submit') }}</button>
+          <textarea name="notes" ngModel rows="3" maxlength="1000" class="field resize-none" [placeholder]="i.t('home.bk.phNotes')"></textarea></label>
+        <!-- honeypot: hidden from people, bots fill it and the API drops the booking -->
+        <input type="text" name="website" ngModel tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -start-[9999px] w-px h-px opacity-0">
+
+        @if (err()) {
+          <p class="relative rounded-2xl border border-brand-red/40 bg-brand-red/10 text-brand-red2 p-3 text-sm font-bold" role="alert">{{ i.t('book.err.' + err()) }}</p>
+        }
+        @if (code()) {
+          <p class="relative rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 p-3 text-sm font-bold" role="status">
+            {{ i.t('home.bk.ok') }} <b dir="ltr">{{ code() }}</b></p>
+        }
+        <button type="submit" [disabled]="sending()" class="btn btn-red relative w-full justify-center !py-4 text-lg disabled:opacity-60 disabled:pointer-events-none">
+          <app-icon name="wa" class="w-5 h-5" />{{ sending() ? i.t('book.sending') : i.t('home.bk.submit') }}</button>
         <p class="relative muted text-xs text-center">{{ i.t('home.bk.hint') }}</p>
       </form>
     </div>
@@ -59,11 +90,84 @@ import { Reveal } from '../reveal.directive';
 })
 export class BookingForm {
   protected readonly i = inject(I18n);
+  private readonly api = inject(BookingApi);
   protected readonly models = SITE.models;
-  protected readonly today = new Date().toISOString().slice(0, 10);
+  protected readonly today = iso(new Date());
+  protected readonly maxDate = iso(new Date(Date.now() + DAYS_AHEAD * 864e5));
 
-  send(f: NgForm) {
+  protected readonly date = signal('');
+  /** Places left per "yyyy-mm-dd|hour". undefined = not loaded yet, null = API unreachable (all hours offered). */
+  private readonly slots = signal<Map<string, number> | null | undefined>(undefined);
+  protected readonly sending = signal(false);
+  protected readonly err = signal<'' | 'taken' | 'many' | 'generic'>('');
+  protected readonly code = signal('');
+
+  /** Hours for the chosen day; past hours today are hidden. */
+  protected readonly times = computed(() => {
+    const d = this.date(), map = this.slots();
+    if (!d) return [];
+    const now = new Date(), isToday = d === iso(now);
+    const out: { h: number; left: number }[] = [];
+    for (let h = OPEN; h < CLOSE; h++) {
+      if (isToday && h <= now.getHours()) continue;
+      out.push({ h, left: map ? map.get(`${d}|${h}`) ?? 0 : 1 });
+    }
+    return out;
+  });
+
+  protected pickDate(d: string, f: NgForm) {
+    this.date.set(d);
+    f.controls['hour']?.setValue('');
+    if (this.slots() === undefined) this.loadSlots();
+  }
+
+  private loadSlots() {
+    this.api.slots(DAYS_AHEAD + 1).subscribe({
+      next: days => this.slots.set(new Map(days.flatMap(d => d.hours.map(h => [`${d.date}|${h.hour}`, d.closed ? 0 : h.left] as const)))),
+      error: () => this.slots.set(null),
+    });
+  }
+
+  protected fmtHour(h: number) {
+    const ar = this.i.isAr(), h12 = h % 12 || 12;
+    return `${h12}:00 ${h < 12 ? (ar ? 'ص' : 'AM') : (ar ? 'م' : 'PM')}`;
+  }
+
+  /** Save the booking in the API first, then open WhatsApp with the returned code. */
+  async send(f: NgForm) {
     if (f.invalid) { f.control.markAllAsTouched(); return; }
-    window.open(waLink(this.i.dict().home.bk.msg(f.value)), '_blank');
+    if (this.sending()) return;
+    this.err.set(''); this.code.set('');
+    const v = f.value, hour = +v.hour;
+    // open the tab inside the click so popup blockers allow it; it's pointed at WhatsApp after the API answers
+    const tab = window.open('', '_blank');
+    this.sending.set(true);
+    let code = '';
+    try {
+      const r = await firstValueFrom(this.api.create({
+        name: v.name.trim(), phone: v.phone.trim(), model: v.model, services: [v.service],
+        date: v.date, hour, notes: v.notes?.trim() || undefined, website: v.website || undefined,
+      }));
+      code = r.code;
+      this.code.set(code);
+    } catch (e) {
+      const he = e instanceof HttpErrorResponse ? e : null, status = he?.status ?? 0;
+      const fields = status === 400 ? Object.keys(he?.error?.errors ?? {}).map(k => k.toLowerCase()) : [];
+      if (status === 409 || fields.includes('date') || fields.includes('hour')) {
+        tab?.close();
+        this.err.set('taken'); f.controls['hour']?.setValue(''); this.loadSlots();
+        return;
+      }
+      if (status === 400 || status === 429) { tab?.close(); this.err.set(status === 429 ? 'many' : 'generic'); return; }
+      // API unreachable (offline / 5xx / timeout): still send it on WhatsApp, like before the API existed
+    } finally {
+      this.sending.set(false);
+    }
+
+    const service = this.i.dict().services.find(s => s.slug === v.service)?.t ?? v.service;
+    const model = v.model === 'Other' ? this.i.t('common.other') : v.model;
+    const when = new Date(`${v.date}T00:00`).toLocaleDateString(this.i.isAr() ? 'ar-EG-u-nu-latn' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const url = waLink(this.i.dict().home.bk.msg({ code, name: v.name, phone: v.phone, model, service, date: `${when} — ${this.fmtHour(hour)}`, notes: v.notes }));
+    if (tab) tab.location.href = url; else window.open(url, '_blank');
   }
 }

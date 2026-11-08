@@ -81,7 +81,7 @@ namespace ElSayedHassan.Api.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("Year")
+                    b.Property<int?>("Year")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

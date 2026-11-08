@@ -18,7 +18,7 @@ public record CreateBookingDto
     public string? Generation { get; init; }
 
     [Range(1980, 2100)]
-    public int Year { get; init; }
+    public int? Year { get; init; }
 
     [StringLength(20)]
     public string? Km { get; init; }

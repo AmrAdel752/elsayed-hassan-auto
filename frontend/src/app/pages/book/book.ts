@@ -5,6 +5,9 @@ import { SITE, waLink } from '../../core/site';
 import { PageBanner } from '../../shared/page-banner';
 import { Icon } from '../../shared/icon';
 import { saveBooking, savedInSlot } from '../../data/tracking';
+import { HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { BookingApi, SlotDay } from '../../core/booking-api';
 
 interface Day { iso: string; label: string; wd: string; d: number; full: boolean; }
 
@@ -21,6 +24,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 })
 export class Book implements OnInit {
   protected readonly i = inject(I18n);
+  private readonly api = inject(BookingApi);
   protected readonly models = SITE.models;
   protected readonly years = Array.from({ length: 22 }, (_, k) => 2026 - k);
   protected readonly hours = Array.from({ length: CLOSE - OPEN }, (_, k) => OPEN + k);
@@ -45,6 +49,17 @@ export class Book implements OnInit {
   protected readonly phone = signal('');
   protected readonly notes = signal('');
   protected readonly code = signal('');
+  /** Honeypot (hidden input): real visitors never fill it. */
+  protected readonly website = signal('');
+
+  /**
+   * Places left per "yyyy-mm-dd|hour" from the API.
+   * undefined = loading, null = API unreachable (falls back to the offline estimate below).
+   */
+  protected readonly slots = signal<Map<string, number> | null | undefined>(undefined);
+  protected readonly sending = signal(false);
+  /** Error shown above the nav bar (i18n key under book.err). */
+  protected readonly err = signal<'' | 'taken' | 'many' | 'generic'>('');
 
   protected readonly phoneOk = computed(() => /^01[0125]\d{8}$/.test(this.phone().trim()));
   protected readonly canNext = computed(() => [
@@ -83,17 +98,29 @@ export class Book implements OnInit {
   });
 
   ngOnInit() {
+    this.loadSlots();
     const m = this.modelParam();
     if (m && this.models.includes(m)) this.model.set(m);
     const s = this.service();
     if (s && this.i.dict().services.some(x => x.slug === s)) this.picked.set([s]);
   }
 
+  /** Load availability from the API (GET /api/slots). */
+  protected loadSlots() {
+    this.api.slots(14).subscribe({
+      next: days => this.slots.set(toMap(days)),
+      error: () => this.slots.set(null),
+    });
+  }
+
   /**
-   * Free places left in a slot (0 = closed). Until the API exists: past hours today are closed,
-   * a stable pseudo-random number of slots are already taken, plus bookings made in this browser.
+   * Free places left in a slot (0 = closed). From the API when it's reachable; otherwise an offline
+   * estimate: past hours today are closed, a stable pseudo-random number are taken, plus bookings made here.
    */
   protected left(iso: string, h: number) {
+    const map = this.slots();
+    if (map) return map.get(`${iso}|${h}`) ?? 0;
+    if (map === undefined) return 0;   // still loading
     const now = new Date(), today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
     if (iso === today && h <= now.getHours()) return 0;
     const seed = [...iso].reduce((a, c) => a * 31 + c.charCodeAt(0), 0) + h * 5;
@@ -116,15 +143,45 @@ export class Book implements OnInit {
 
   protected go(n: number) {
     if (n > this.step() && !this.canNext()) return;
+    this.err.set('');
+    if (n === 2 && this.step() !== 2) this.loadSlots();   // fresh availability every time the time step opens
     this.step.set(n);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected confirm() {
-    this.code.set(`SHA-${Math.floor(10000 + Math.random() * 90000)}`);
+  /** Save the booking in the API first, then open WhatsApp with the returned code. */
+  protected async confirm() {
+    if (this.sending()) return;
+    this.err.set('');
+    // open the tab inside the click so popup blockers allow it; it's pointed at WhatsApp after the API answers
+    const tab = window.open('', '_blank');
+    this.sending.set(true);
+    try {
+      const r = await firstValueFrom(this.api.create({
+        name: this.name().trim(), phone: this.phone().trim(), model: this.model(), generation: this.gen() || undefined,
+        year: this.year(), km: this.km().trim() || undefined, services: this.picked(), date: this.date(), hour: this.hour()!,
+        notes: this.notes().trim() || undefined, website: this.website() || undefined,
+      }));
+      this.code.set(r.code);
+    } catch (e) {
+      const he = e instanceof HttpErrorResponse ? e : null, status = he?.status ?? 0;
+      const fields = status === 400 ? Object.keys(he?.error?.errors ?? {}).map(k => k.toLowerCase()) : [];
+      if (status === 409 || fields.includes('date') || fields.includes('hour')) {
+        // the hour was just taken (or is no longer valid): back to the time step with fresh slots
+        tab?.close();
+        this.hour.set(null); this.loadSlots(); this.step.set(2); this.err.set('taken');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (status === 400 || status === 429) { tab?.close(); this.err.set(status === 429 ? 'many' : 'generic'); return; }
+      // API unreachable (offline / 5xx / timeout): don't lose the customer, send it on WhatsApp with a local code
+      this.code.set(`SHA-${Math.floor(10000 + Math.random() * 90000)}`);
+    } finally {
+      this.sending.set(false);
+    }
     saveBooking({ code: this.code(), model: this.car(), year: this.year(), services: this.picked(), date: this.date(), hour: this.hour()! });
-    // the booking only reaches the shop once the customer sends it on WhatsApp, so open it right away
-    window.open(this.waUrl(), '_blank');
+    // the shop is notified when the customer sends the WhatsApp message, so open it right away
+    if (tab) tab.location.href = this.waUrl(); else window.open(this.waUrl(), '_blank');
     this.step.set(5);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -138,6 +195,9 @@ export class Book implements OnInit {
 
   protected reset() {
     this.step.set(0); this.model.set(''); this.gen.set(''); this.km.set(''); this.picked.set([]); this.date.set('');
-    this.hour.set(null); this.name.set(''); this.phone.set(''); this.notes.set(''); this.code.set('');
+    this.hour.set(null); this.name.set(''); this.phone.set(''); this.notes.set(''); this.code.set(''); this.err.set('');
   }
 }
+
+const toMap = (days: SlotDay[]) =>
+  new Map(days.flatMap(d => d.hours.map(h => [`${d.date}|${h.hour}`, d.closed ? 0 : h.left] as const)));

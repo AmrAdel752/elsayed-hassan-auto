@@ -22,7 +22,8 @@ public class Booking : BaseEntity
     public string Model { get; set; } = "";
     /// <summary>Optional generation, e.g. "N17".</summary>
     public string? Generation { get; set; }
-    public int Year { get; set; }
+    /// <summary>Model year (optional: the home quick form doesn't ask for it).</summary>
+    public int? Year { get; set; }
     /// <summary>Odometer as typed by the customer (free text, optional).</summary>
     public string? Km { get; set; }
 

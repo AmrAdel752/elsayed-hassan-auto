@@ -12,8 +12,11 @@ builder.Services.AddDbContext<AppDbContext>(o =>
 // CORS: allowed origins come from config ("Cors:Origins"), so production can override via env vars.
 const string CorsPolicy = "frontend";
 var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
+var isDev = builder.Environment.IsDevelopment();
 builder.Services.AddCors(o => o.AddPolicy(CorsPolicy, p => p
-    .WithOrigins(corsOrigins)
+    // dev: any http://localhost:<port> (ng serve may pick 4201, 4202, ...)
+    .SetIsOriginAllowed(origin => corsOrigins.Contains(origin) ||
+        (isDev && Uri.TryCreate(origin, UriKind.Absolute, out var u) && u.Host == "localhost"))
     .AllowAnyHeader()
     .AllowAnyMethod()));
 

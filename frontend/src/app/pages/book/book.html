@@ -85,6 +85,9 @@
           <p class="muted text-sm mb-5 md:mb-7 flex items-start gap-2"><app-icon name="clock" class="w-4 h-4 mt-1 shrink-0 text-brand-red2" />{{ T.note }}</p>
 
           <!-- days: swipe row on phones, 7-column calendar from sm up -->
+          @if (slots() === undefined) {
+            <p class="mb-4 text-sm font-bold muted flex items-center gap-2" role="status"><span class="w-4 h-4 rounded-full border-2 border-brand-red border-t-transparent animate-spin"></span>{{ T.loading }}</p>
+          }
           <h3 class="text-sm font-extrabold mb-3 flex items-center gap-2"><span class="w-6 h-6 rounded-full grid place-items-center bg-brand-red/10 text-brand-red2 text-xs">1</span>{{ T.day }}</h3>
           <div class="flex gap-2 overflow-x-auto snap-x -mx-4 px-4 pb-2 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-7 sm:overflow-visible [scrollbar-width:none] mb-7">
             @for (d of days(); track d.iso) {
@@ -132,14 +135,17 @@
           <h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6">{{ i.t('book.info.h') }}</h2>
           <div class="grid sm:grid-cols-2 gap-4">
             <label><span class="lbl">{{ i.t('book.info.name') }}</span>
-              <input class="field" [placeholder]="i.t('book.info.phName')" [ngModel]="name()" (ngModelChange)="name.set($event)"></label>
+              <input class="field" maxlength="100" [placeholder]="i.t('book.info.phName')" [ngModel]="name()" (ngModelChange)="name.set($event)"></label>
             <label><span class="lbl">{{ i.t('book.info.phone') }}</span>
               <input class="field" type="tel" dir="ltr" placeholder="01xxxxxxxxx" maxlength="11" [ngModel]="phone()" (ngModelChange)="phone.set($event)">
               @if (phone() && !phoneOk()) { <small class="text-brand-red2 text-xs font-bold mt-1 block">{{ i.t('book.info.badPhone') }}</small> }
             </label>
           </div>
           <label class="block mt-4"><span class="lbl">{{ i.t('book.info.notes') }}</span>
-            <textarea class="field resize-none" rows="4" [placeholder]="i.t('book.info.phNotes')" [ngModel]="notes()" (ngModelChange)="notes.set($event)"></textarea></label>
+            <textarea class="field resize-none" rows="4" maxlength="1000" [placeholder]="i.t('book.info.phNotes')" [ngModel]="notes()" (ngModelChange)="notes.set($event)"></textarea></label>
+          <!-- honeypot: hidden from people, bots fill it and the API drops the booking -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
+                 class="absolute -start-[9999px] w-px h-px opacity-0" [ngModel]="website()" (ngModelChange)="website.set($event)">
         }
 
         <!-- step 5: review -->
@@ -162,6 +168,11 @@
           </div>
         }
 
+        @if (err()) {
+          <p class="mt-6 rounded-2xl border border-brand-red/40 bg-brand-red/10 text-brand-red2 p-4 text-sm font-bold flex items-start gap-2" role="alert">
+            <app-icon name="clock" class="w-5 h-5 shrink-0" />{{ i.t('book.err.' + err()) }}</p>
+        }
+
         <!-- nav -->
         <!-- phones: sticks above the bottom tab bar so Next is always in reach -->
         <div class="sticky lg:static z-10 bottom-[calc(76px+env(safe-area-inset-bottom))] -mx-4 sm:-mx-5 md:mx-0 px-4 sm:px-5 md:px-0 py-3 lg:py-0 mt-6 md:mt-10 lg:pt-6 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-ink-600 bg-white/95 dark:bg-ink-700/95 backdrop-blur lg:bg-transparent lg:dark:bg-transparent lg:backdrop-blur-none rounded-b-[20px] lg:rounded-none">
@@ -173,7 +184,7 @@
             <button type="button" (click)="go(step() + 1)" [disabled]="!canNext()" class="btn btn-red flex-1 sm:flex-none justify-center !py-3 md:!py-3.5 disabled:opacity-40 disabled:pointer-events-none">
               {{ i.t('book.next') }}<app-icon name="arrow" class="w-5 h-5 rtl:rotate-180" /></button>
           } @else {
-            <button type="button" (click)="confirm()" class="btn bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,.7)] flex-1 sm:flex-none justify-center !py-3 md:!py-3.5"><app-icon name="wa" class="w-5 h-5" />{{ i.t('book.confirm') }}</button>
+            <button type="button" (click)="confirm()" [disabled]="sending()" class="btn disabled:opacity-60 disabled:pointer-events-none bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,.7)] flex-1 sm:flex-none justify-center !py-3 md:!py-3.5"><app-icon name="wa" class="w-5 h-5" />{{ sending() ? i.t('book.sending') : i.t('book.confirm') }}</button>
           }
         </div>
       </div>

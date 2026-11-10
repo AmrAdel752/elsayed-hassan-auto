@@ -1,3 +1,4 @@
+using ElSayedHassan.Api.Controllers.Admin;
 using ElSayedHassan.Api.Data;
 using ElSayedHassan.Api.Entities;
 using ElSayedHassan.Api.Services;
@@ -38,10 +39,11 @@ builder.Services.AddAppRateLimits(builder.Configuration);
 // Admin auth: hashed passwords + JWT (Jwt:Key from user-secrets / env var)
 builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddAppJwt(builder.Configuration);
-builder.Services.AddAuthorization();
+builder.Services.AddAdminPolicies();   // [Authorize] on /api/admin/* via AdminControllerBase
 
+builder.Services.AddRouting(o => o.LowercaseUrls = true);   // /api/admin/me, not /api/admin/Me
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(o => o.AddBearerAuth());
 
 var app = builder.Build();
 
@@ -51,7 +53,9 @@ app.UseStatusCodePages();    // empty 4xx/5xx responses -> ProblemDetails
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();                 // /openapi/v1.json
-    app.MapScalarApiReference();      // /scalar
+    app.MapScalarApiReference(o => o  // /scalar  (Auth box: paste the token from POST /api/auth/login)
+        .WithTitle("El Sayed Hassan Auto API")
+        .AddPreferredSecuritySchemes(OpenApiBearer.Scheme));
 }
 
 app.UseHttpsRedirection();
@@ -63,6 +67,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/health");
 app.MapControllers();
 
+AdminRouteGuard.Verify(app.Services);   // refuse to start if any /api/admin action is not protected
 await AdminSeeder.SeedOwnerAsync(app.Services);
 
 app.Run();

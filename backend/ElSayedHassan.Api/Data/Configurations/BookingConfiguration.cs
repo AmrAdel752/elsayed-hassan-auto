@@ -17,6 +17,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         b.Property(x => x.Generation).HasMaxLength(50);
         b.Property(x => x.Km).HasMaxLength(20);
         b.Property(x => x.Notes).HasMaxLength(1000);
+        b.Property(x => x.AdminNote).HasMaxLength(1000);
         b.Property(x => x.Services).HasMaxLength(1000);   // JSON array of slugs
 
         b.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);

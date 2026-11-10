@@ -37,4 +37,9 @@ public class Booking : BaseEntity
 
     public string? Notes { get; set; }
     public BookingStatus Status { get; set; } = BookingStatus.New;
+
+    /// <summary>Internal note written by the shop (never shown to the customer).</summary>
+    public string? AdminNote { get; set; }
+    /// <summary>Last change from the dashboard (UTC).</summary>
+    public DateTime? UpdatedAt { get; set; }
 }

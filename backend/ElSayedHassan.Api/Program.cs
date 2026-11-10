@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ElSayedHassan.Api.Controllers.Admin;
 using ElSayedHassan.Api.Data;
 using ElSayedHassan.Api.Entities;
@@ -41,8 +42,11 @@ builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUs
 builder.Services.AddAppJwt(builder.Configuration);
 builder.Services.AddAdminPolicies();   // [Authorize] on /api/admin/* via AdminControllerBase
 
+builder.Services.AddUploads(builder.Configuration);   // product / offer images, served from /uploads
+
 builder.Services.AddRouting(o => o.LowercaseUrls = true);   // /api/admin/me, not /api/admin/Me
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));   // "Confirmed", not 1
 builder.Services.AddOpenApi(o => o.AddBearerAuth());
 
 var app = builder.Build();
@@ -59,6 +63,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseUploads();
 app.UseCors(CorsPolicy);
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -69,5 +74,6 @@ app.MapControllers();
 
 AdminRouteGuard.Verify(app.Services);   // refuse to start if any /api/admin action is not protected
 await AdminSeeder.SeedOwnerAsync(app.Services);
+await CatalogSeeder.SeedAsync(app.Services);            // first start only (empty catalog tables)
 
 app.Run();

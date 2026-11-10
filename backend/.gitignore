@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# uploaded images (kept on the server, not in git)
+**/wwwroot/uploads/

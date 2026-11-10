@@ -60,19 +60,19 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 
 ## H — Admin: bookings
 
-- [ ] **H1** `GET /api/admin/bookings?date=&status=&q=&page=`
-- [ ] **H2** `PATCH /api/admin/bookings/{id}` status (Confirmed / Cancelled / Done / NoShow) + internal note
+- [x] **H1** `GET /api/admin/bookings?date=&status=&q=&page=`
+- [x] **H2** `PATCH /api/admin/bookings/{id}` status (Confirmed / Cancelled / Done / NoShow) + internal note
 - [ ] **H3** Admin bookings page: Today / This week tabs, booking cards, status buttons, call + WhatsApp buttons
-- [ ] **H4** Admin home: today's count, upcoming, new (unconfirmed) bookings
-- [ ] **H5** Slot settings: API + page (capacity, close a day, close an hour)
+- [ ] **H4** Admin home: today's count, upcoming, new (unconfirmed) bookings — API done (`GET /api/admin/dashboard`), page pending
+- [ ] **H5** Slot settings: API + page (capacity, close a day, close an hour) — API done (`/api/admin/slots`), page pending
 
 ## I — Products & offers
 
-- [ ] **I1** Entities `Category`, `Product` (+ models), `Offer` (+ includes) + migration + seed from `catalog.ts`
-- [ ] **I2** Public `GET /api/categories`, `/api/products`, `/api/products/{slug}`, `/api/offers` (active only)
-- [ ] **I3** Admin CRUD products + categories
-- [ ] **I4** Image upload `POST /api/admin/uploads` (jpg/png/webp, size limit) → served from `/uploads`
-- [ ] **I5** Admin CRUD offers
+- [x] **I1** Entities `Category`, `Product` (+ models), `Offer` (+ includes) + migration + seed from `catalog.ts`
+- [x] **I2** Public `GET /api/categories`, `/api/products`, `/api/products/{slug}`, `/api/offers` (active only)
+- [x] **I3** Admin CRUD products + categories
+- [x] **I4** Image upload `POST /api/admin/uploads` (jpg/png/webp, size limit) → served from `/uploads`
+- [x] **I5** Admin CRUD offers
 - [ ] **I6** Admin products page (list + form + image)
 - [ ] **I7** Admin offers page
 - [ ] **I8** Frontend public pages (home, products, product details, offers) read from API (loading state + fallback)

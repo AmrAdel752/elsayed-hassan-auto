@@ -49,12 +49,8 @@ public partial class BookingService(AppDbContext db, SlotService slots, CairoClo
         // ---- capacity check + insert, serialized per slot ----
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
 
-        // App lock on "slot:yyyy-MM-dd:HH", released on commit/rollback. Two requests for the same
-        // slot can't both read "2 taken" and both insert; other slots are not blocked.
-        var resource = $"slot:{dto.Date:yyyy-MM-dd}:{dto.Hour:00}";
-        await db.Database.ExecuteSqlInterpolatedAsync(
-            $"DECLARE @r int; EXEC @r = sp_getapplock @Resource = {resource}, @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 10000; IF @r < 0 THROW 51000, 'Could not lock booking slot.', 1;",
-            ct);
+        // Two requests for the same slot can't both read "2 taken" and both insert; other slots are not blocked.
+        await slots.LockSlotAsync(dto.Date, dto.Hour, ct);
 
         var inSlot = await slots.ActiveBookings()
             .Where(b => b.Date == dto.Date && b.Hour == dto.Hour)

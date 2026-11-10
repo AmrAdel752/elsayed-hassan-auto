@@ -17,6 +17,18 @@ public class SlotService(AppDbContext db, CairoClock clock)
     public IQueryable<Booking> ActiveBookings() =>
         db.Bookings.Where(b => b.Status != BookingStatus.Cancelled);
 
+    /// <summary>
+    /// Exclusive app lock on "slot:yyyy-MM-dd:HH" for the current transaction (released on commit/rollback).
+    /// Call inside a transaction before counting the slot's bookings.
+    /// </summary>
+    public Task LockSlotAsync(DateOnly date, int hour, CancellationToken ct)
+    {
+        var resource = $"slot:{date:yyyy-MM-dd}:{hour:00}";
+        return db.Database.ExecuteSqlInterpolatedAsync(
+            $"DECLARE @r int; EXEC @r = sp_getapplock @Resource = {resource}, @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 10000; IF @r < 0 THROW 51000, 'Could not lock booking slot.', 1;",
+            ct);
+    }
+
     /// <summary>Time/rules check without DB lookups for closures (used for every hour in the grid).</summary>
     public SlotBlock CheckTime(SlotSettings s, DateOnly date, int hour)
     {

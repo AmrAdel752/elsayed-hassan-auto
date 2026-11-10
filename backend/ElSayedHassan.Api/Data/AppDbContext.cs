@@ -10,6 +10,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ClosedDay> ClosedDays => Set<ClosedDay>();
     public DbSet<ClosedSlot> ClosedSlots => Set<ClosedSlot>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Offer> Offers => Set<Offer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

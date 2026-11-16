@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { I18n } from '../../core/i18n.service';
 import { SITE, waLink } from '../../core/site';
 import { Icon } from '../../shared/icon';
@@ -11,8 +11,8 @@ import { CtaBand } from '../../shared/cta-band';
 import { CarExplorer } from '../../shared/sections/car-explorer';
 import { ProductCard } from '../../shared/product-card';
 import { OfferCard } from '../../shared/offer-card';
-import { OFFERS, PRODUCTS } from '../../data/catalog';
-import { REVIEWS } from '../../data/reviews';
+import { CatalogStore } from '../../core/catalog.store';
+import { CAR_MODELS, MODEL_AR } from '../../data/models';
 import { ReviewCard } from '../../shared/review-card';
 import { RouterLink } from '@angular/router';
 
@@ -28,7 +28,12 @@ export class Home {
   protected readonly wa = waLink();
   protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }];
   protected readonly models = SITE.models.map(m => m.toUpperCase());
-  protected readonly reviews = REVIEWS.slice(0, 3);
-  protected readonly featured = PRODUCTS.filter(p => p.featured).slice(0, 8);
-  protected readonly offers = signal(OFFERS.filter(o => new Date(o.endsAt).getTime() > Date.now()));
+  private readonly store = inject(CatalogStore);
+  /** Model links for the "about us" text section: "صيانة نيسان صني" → /models/sunny. */
+  protected readonly modelLinks = computed(() => CAR_MODELS.map(m => ({
+    slug: m.slug, label: this.i.dict().home.seo.model(this.i.isAr() ? MODEL_AR[m.name] ?? m.name : m.name),
+  })));
+  protected readonly reviews = computed(() => this.store.reviews().slice(0, 3));
+  protected readonly featured = computed(() => this.store.products().filter(p => p.featured).slice(0, 8));
+  protected readonly offers = computed(() => this.store.offers().filter(o => new Date(o.endsAt).getTime() > Date.now()));
 }

@@ -16,6 +16,11 @@ const AC_ISSUE: Issue = { service: 'ac', title: T('ضعف التكييف في ا
 const SUSP_ISSUE: Issue = { service: 'suspension', title: T('صوت تخبيط في العفشة', 'Suspension knocking'), desc: T('جلب المقصات أو المساعدين — بنحدد القطعة بالظبط على الرافعة.', 'Control-arm bushings or shocks — we pinpoint the part on the lift.') };
 const IDLE_ISSUE: Issue = { service: 'maintenance', title: T('رعشة في السلانسيه', 'Rough idle'), desc: T('ثروتل محتاج تنظيف أو بوجيهات وموبينة.', 'Dirty throttle body, spark plugs or ignition coil.') };
 
+/** Arabic model names, the way people type them in search ("صيانة نيسان صني"). */
+export const MODEL_AR: Record<string, string> = {
+  Sunny: 'صني', Sentra: 'سنترا', Qashqai: 'قشقاي', 'X-Trail': 'إكس تريل', Juke: 'جوك', Tiida: 'تيدا', Patrol: 'باترول', Kicks: 'كيكس', Magnite: 'ماجنايت',
+};
+
 export const CAR_MODELS: CarModel[] = [
   { slug: 'sunny', name: 'Sunny', type: SEDAN, years: '2011 — 2026', engine: '1.5L', gearbox: T('عادي / أوتوماتيك', 'Manual / Automatic'),
     tagline: T('العربية الأكثر انتشاراً في مصر — وإحنا عارفينها حتة حتة.', 'Egypt\'s most popular sedan — and we know every part of it.'),

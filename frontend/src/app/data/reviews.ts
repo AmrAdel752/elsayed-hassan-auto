@@ -4,7 +4,7 @@
  */
 import type { Tr } from './catalog';
 
-export interface Review { id: number; name: Tr; model: string; year: number; service: string; rating: number; date: string; text: Tr; }
+export interface Review { id: number; name: Tr; model?: string; year?: number; service?: string; rating: number; date: string; text: Tr; }
 
 export const REVIEWS: Review[] = [
   { id: 1, name: { ar: 'أحمد محمود', en: 'Ahmed Mahmoud' }, model: 'Sunny', year: 2019, service: 'maintenance', rating: 5, date: '2026-10-28',

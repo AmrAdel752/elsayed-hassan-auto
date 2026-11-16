@@ -5,8 +5,9 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { CATEGORIES, PRODUCTS, OFFERS } from '../src/app/data/catalog.ts';
+import { REVIEWS } from '../src/app/data/reviews.ts';
 
 const dir = '../backend/ElSayedHassan.Api/Data/Seed';
 mkdirSync(dir, { recursive: true });
-writeFileSync(`${dir}/catalog.json`, JSON.stringify({ categories: CATEGORIES, products: PRODUCTS, offers: OFFERS }, null, 2) + '\n');
-console.log(`catalog.json: ${CATEGORIES.length} categories, ${PRODUCTS.length} products, ${OFFERS.length} offers`);
+writeFileSync(`${dir}/catalog.json`, JSON.stringify({ categories: CATEGORIES, products: PRODUCTS, offers: OFFERS, reviews: REVIEWS }, null, 2) + '\n');
+console.log(`catalog.json: ${CATEGORIES.length} categories, ${PRODUCTS.length} products, ${OFFERS.length} offers, ${REVIEWS.length} reviews`);

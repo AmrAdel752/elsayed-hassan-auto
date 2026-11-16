@@ -11,12 +11,15 @@ export interface Product {
   name: Tr; desc: Tr;
   price: number; oldPrice?: number;
   models: string[]; inStock: boolean; featured?: boolean; badge?: Tr;
+  /** Uploaded image (from the dashboard); the icon is shown when it's missing. */
+  img?: string;
 }
 
 export interface Offer {
   id: string; icon: string; title: Tr; desc: Tr;
   discount: Tr; price?: number; oldPrice?: number;
   endsAt: string; service?: string; includes: Tr[];
+  img?: string;
 }
 
 export const CATEGORIES: Category[] = [

@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { Seo } from '../../core/seo.service';
 import { RouterLink } from '@angular/router';
 import { I18n } from '../../core/i18n.service';
-import { CAR_MODELS } from '../../data/models';
-import { PRODUCTS } from '../../data/catalog';
+import { CAR_MODELS, MODEL_AR } from '../../data/models';
+import { CatalogStore } from '../../core/catalog.store';
 import { PageBanner } from '../../shared/page-banner';
 import { ProductCard } from '../../shared/product-card';
 import { ModelCard } from '../../shared/model-card';
@@ -91,9 +91,14 @@ import { Reveal } from '../../shared/reveal.directive';
 })
 export class ModelDetails {
   protected readonly i = inject(I18n);
+  private readonly store = inject(CatalogStore);
   private readonly seo = inject(Seo);
   // item-specific <title>/description for this page
-  private readonly seoFx = effect(() => { const m = this.car(); if (m) this.seo.set({ title: `Nissan ${m.name}`, desc: this.i.l(m.tagline) }); });
+  private readonly seoFx = effect(() => { const m = this.car(); if (m) this.seo.set({
+    // Arabic visitors search with the Arabic model name ("صيانة نيسان صني")
+    title: this.i.isAr() ? `صيانة نيسان ${MODEL_AR[m.name] ?? m.name} (Nissan ${m.name}) — أعطال وقطع غيار` : `Nissan ${m.name} Service — Common Issues & Parts`,
+    desc: this.i.l(m.tagline),
+  }); });
   /** Bound from the `:slug` route param. */
   readonly slug = input<string>();
   protected readonly car = computed(() => CAR_MODELS.find(m => m.slug === this.slug()));
@@ -105,7 +110,7 @@ export class ModelDetails {
       { k: 'engine', icon: 'engine', v: m.engine, ltr: true }, { k: 'gearbox', icon: 'cpu', v: this.i.l(m.gearbox) },
     ];
   });
-  protected readonly parts = computed(() => PRODUCTS.filter(p => p.models.includes(this.car()?.name ?? '')).slice(0, 4));
+  protected readonly parts = computed(() => this.store.products().filter(p => p.models.includes(this.car()?.name ?? '')).slice(0, 4));
   protected readonly others = computed(() => {
     const idx = CAR_MODELS.findIndex(m => m.slug === this.slug());
     return [1, 2, 3, 4].map(k => CAR_MODELS[(idx + k) % CAR_MODELS.length]);

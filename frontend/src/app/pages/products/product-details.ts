@@ -3,7 +3,8 @@ import { Seo } from '../../core/seo.service';
 import { RouterLink } from '@angular/router';
 import { I18n } from '../../core/i18n.service';
 import { waLink } from '../../core/site';
-import { CATEGORIES, PRODUCTS } from '../../data/catalog';
+import { CatalogStore } from '../../core/catalog.store';
+import { imgUrl } from '../../core/media';
 import { PageBanner } from '../../shared/page-banner';
 import { ProductCard } from '../../shared/product-card';
 import { Icon } from '../../shared/icon';
@@ -23,7 +24,8 @@ import { Reveal } from '../../shared/reveal.directive';
           <div reveal class="card relative aspect-[4/3] sm:aspect-square overflow-hidden !rounded-[20px] md:!rounded-[28px] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-ink-700 dark:to-ink-900">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_55%,rgba(220,47,54,.25),transparent_60%)]"></div>
             <div class="absolute inset-[18%] rounded-full border-2 border-dashed border-brand-red/30 animate-spin40"></div>
-            <app-icon [name]="p.icon" class="absolute inset-0 m-auto w-28 h-28 sm:w-40 sm:h-40 text-brand-red2 animate-float" />
+            @if (p.img) { <img [src]="src(p.img)" [alt]="i.l(p.name)" class="absolute inset-0 w-full h-full object-cover"> }
+            @else { <app-icon [name]="p.icon" class="absolute inset-0 m-auto w-28 h-28 sm:w-40 sm:h-40 text-brand-red2 animate-float" /> }
             <span class="absolute bottom-4 sm:bottom-6 inset-x-0 text-center font-[Arial] font-black tracking-[3px] sm:tracking-[5px] text-xs sm:text-base text-zinc-400 dark:text-zinc-500">{{ p.brand.toUpperCase() }}</span>
             @if (off()) { <span class="absolute top-5 start-5 px-3 py-1.5 rounded-xl bg-brand-red text-white font-black" dir="ltr">-{{ off() }}%</span> }
           </div>
@@ -85,7 +87,7 @@ import { Reveal } from '../../shared/reveal.directive';
           </div>
         </section>
       }
-    } @else {
+    } @else if (store.ready()) {
       <section class="wrap min-h-[50vh] grid place-items-center text-center py-24">
         <div><h1 class="h2">{{ i.t('shop.notFound') }}</h1><a routerLink="/products" class="btn btn-red mt-6">{{ i.t('nav.products') }}</a></div>
       </section>
@@ -94,13 +96,15 @@ import { Reveal } from '../../shared/reveal.directive';
 })
 export class ProductDetails {
   protected readonly i = inject(I18n);
+  protected readonly src = imgUrl;
   private readonly seo = inject(Seo);
   // item-specific <title>/description for this page
   private readonly seoFx = effect(() => { const p = this.product(); if (p) this.seo.set({ title: this.i.l(p.name), desc: this.i.l(p.desc) }); });
   /** Bound from the `:slug` route param. */
   readonly slug = input<string>();
-  protected readonly product = computed(() => PRODUCTS.find(p => p.slug === this.slug()));
-  protected readonly cat = computed(() => CATEGORIES.find(c => c.id === this.product()?.cat));
+  protected readonly store = inject(CatalogStore);
+  protected readonly product = computed(() => this.store.products().find(p => p.slug === this.slug()));
+  protected readonly cat = computed(() => this.store.categories().find(c => c.id === this.product()?.cat));
   protected readonly off = computed(() => {
     const p = this.product();
     return p?.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
@@ -108,8 +112,8 @@ export class ProductDetails {
   protected readonly related = computed(() => {
     const p = this.product();
     if (!p) return [];
-    const same = PRODUCTS.filter(x => x.slug !== p.slug && x.cat === p.cat);
-    const others = PRODUCTS.filter(x => x.slug !== p.slug && x.cat !== p.cat && x.featured);
+    const same = this.store.products().filter(x => x.slug !== p.slug && x.cat === p.cat);
+    const others = this.store.products().filter(x => x.slug !== p.slug && x.cat !== p.cat && x.featured);
     return [...same, ...others].slice(0, 4);
   });
   protected readonly wa = computed(() => {

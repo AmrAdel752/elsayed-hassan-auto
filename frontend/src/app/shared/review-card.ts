@@ -20,7 +20,7 @@ import { Icon } from './icon';
       <p class="text-zinc-700 dark:text-zinc-300 text-sm md:text-base leading-relaxed mb-5">{{ i.l(r.text) }}</p>
       <div class="mt-auto flex items-center gap-3">
         <div class="w-11 h-11 shrink-0 rounded-full grid place-items-center font-extrabold text-white bg-gradient-to-br from-brand-red2 to-[#8f1a20]">{{ i.l(r.name)[0] }}</div>
-        <div class="min-w-0 flex-1"><b class="block truncate">{{ i.l(r.name) }}</b><small class="muted block text-[13px] font-[Arial]">NISSAN {{ r.model.toUpperCase() }} {{ r.year }}</small></div>
+        <div class="min-w-0 flex-1"><b class="block truncate">{{ i.l(r.name) }}</b><small class="muted block text-[13px] font-[Arial]">@if (r.model) { NISSAN {{ r.model.toUpperCase() }} {{ r.year }} }</small></div>
         @if (svc(); as s) {
           <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-red/10 text-brand-red2 text-[11px] font-bold"><app-icon [name]="s.icon" class="w-3.5 h-3.5" />{{ s.t }}</span>
         }

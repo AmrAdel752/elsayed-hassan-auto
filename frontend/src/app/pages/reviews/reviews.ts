@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { I18n } from '../../core/i18n.service';
 import { SITE, waLink } from '../../core/site';
-import { REVIEWS } from '../../data/reviews';
+import { CatalogStore } from '../../core/catalog.store';
 import { PageBanner } from '../../shared/page-banner';
 import { ReviewCard } from '../../shared/review-card';
 import { Icon } from '../../shared/icon';
@@ -24,7 +24,7 @@ import { Reveal } from '../../shared/reveal.directive';
             <div class="flex justify-center gap-0.5 text-brand-gold my-1">
               @for (s of [1, 2, 3, 4, 5]; track s) { <app-icon name="star" class="w-5 h-5" [class.opacity-25]="s > roundedAvg()" /> }
             </div>
-            <small class="muted">{{ i.dict().rev.count(all.length) }}</small>
+            <small class="muted">{{ i.dict().rev.count(all().length) }}</small>
           </div>
           <div class="space-y-2">
             @for (d of dist(); track d.stars) {
@@ -73,24 +73,24 @@ import { Reveal } from '../../shared/reveal.directive';
 })
 export class Reviews {
   protected readonly i = inject(I18n);
-  protected readonly all = REVIEWS;
+  protected readonly all = inject(CatalogStore).reviews;
   protected readonly maps = SITE.maps;
   protected readonly svc = signal('all');
   protected readonly stars = signal(0);
 
-  protected readonly avg = computed(() => (this.all.reduce((s, r) => s + r.rating, 0) / this.all.length).toFixed(1));
+  protected readonly avg = computed(() => (this.all().reduce((s, r) => s + r.rating, 0) / (this.all().length || 1)).toFixed(1));
   protected readonly roundedAvg = computed(() => Math.round(+this.avg()));
   protected readonly dist = computed(() => [5, 4, 3, 2, 1].map(stars => {
-    const n = this.all.filter(r => r.rating === stars).length;
-    return { stars, n, pct: (n / this.all.length) * 100 };
+    const n = this.all().filter(r => r.rating === stars).length;
+    return { stars, n, pct: (n / (this.all().length || 1)) * 100 };
   }));
 
   protected readonly chips = computed(() => [
     { slug: 'all', icon: '', t: this.i.t('rev.all') },
-    ...this.i.dict().services.filter(s => this.all.some(r => r.service === s.slug)).map(s => ({ slug: s.slug, icon: s.icon, t: s.t })),
+    ...this.i.dict().services.filter(s => this.all().some(r => r.service === s.slug)).map(s => ({ slug: s.slug, icon: s.icon, t: s.t })),
   ]);
 
-  protected readonly list = computed(() => this.all.filter(r =>
+  protected readonly list = computed(() => this.all().filter(r =>
     (this.svc() === 'all' || r.service === this.svc()) && (!this.stars() || r.rating === this.stars())));
 
   protected readonly wa = computed(() => waLink(this.i.t('rev.msg')));

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal, On
 import { FormsModule } from '@angular/forms';
 import { I18n } from '../../core/i18n.service';
 import { SITE } from '../../core/site';
-import { CATEGORIES, PRODUCTS } from '../../data/catalog';
+import { CatalogStore } from '../../core/catalog.store';
 import { PageBanner } from '../../shared/page-banner';
 import { ProductCard } from '../../shared/product-card';
 import { Icon } from '../../shared/icon';
@@ -57,6 +57,7 @@ import { Icon } from '../../shared/icon';
 })
 export class Products implements OnInit {
   protected readonly i = inject(I18n);
+  private readonly store = inject(CatalogStore);
   protected readonly models = SITE.models;
   /** Optional `?cat=` preselect. */
   readonly catParam = input<string>(undefined, { alias: 'cat' });
@@ -67,12 +68,12 @@ export class Products implements OnInit {
 
   protected readonly chips = computed(() => [
     { id: 'all', icon: '', label: this.i.t('shop.all') },
-    ...CATEGORIES.map(c => ({ id: c.id, icon: c.icon, label: this.i.l(c.name) })),
+    ...this.store.categories().map(c => ({ id: c.id, icon: c.icon, label: this.i.l(c.name) })),
   ]);
 
   protected readonly list = computed(() => {
     const q = this.q().trim().toLowerCase(), cat = this.cat(), m = this.model();
-    return PRODUCTS.filter(p =>
+    return this.store.products().filter(p =>
       (cat === 'all' || p.cat === cat) &&
       (!m || p.models.includes(m)) &&
       (!q || `${p.name.ar} ${p.name.en} ${p.brand}`.toLowerCase().includes(q)));
@@ -80,6 +81,6 @@ export class Products implements OnInit {
 
   ngOnInit() {
     const c = this.catParam();
-    if (c && CATEGORIES.some(x => x.id === c)) this.cat.set(c);
+    if (c) this.cat.set(c);   // the chip simply shows no products if the category doesn't exist
   }
 }

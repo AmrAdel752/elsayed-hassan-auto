@@ -22,5 +22,7 @@ export const routes: Routes = [
   { path: 'offers', data: { seo: 'offers' }, loadComponent: () => import('./pages/offers/offers').then(m => m.Offers) },
   { path: 'about', data: { seo: 'about' }, loadComponent: () => import('./pages/about/about').then(m => m.About) },
   { path: 'contact', data: { seo: 'contact' }, loadComponent: () => import('./pages/contact/contact').then(m => m.Contact) },
+  // dashboard: lazy, noindex (app.ts), not in the prerender list or sitemap (scripts/prerender-meta.mts)
+  { path: 'admin', loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES) },
   { path: '**', data: { seo: 'notFound' }, loadComponent: () => import('./pages/not-found').then(m => m.NotFound) },
 ];

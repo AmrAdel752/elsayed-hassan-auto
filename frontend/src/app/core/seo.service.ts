@@ -41,6 +41,10 @@ export class Seo {
 
       this.title.setTitle(fullTitle);
       this.tag('name', 'description', desc);
+      this.tag('name', 'keywords', m.keywords);
+      // one address per page for search engines: no query string (?service=, ?tab=, ...)
+      const u = new URL(this.url());
+      document.querySelector('link[rel="canonical"]')?.setAttribute('href', u.origin + u.pathname);
       this.tag('property', 'og:title', fullTitle);
       this.tag('property', 'og:description', desc);
       this.tag('property', 'og:url', this.url());

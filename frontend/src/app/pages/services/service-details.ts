@@ -111,7 +111,7 @@ export class ServiceDetails {
   protected readonly i = inject(I18n);
   private readonly seo = inject(Seo);
   // item-specific <title>/description for this page
-  private readonly seoFx = effect(() => { const s = this.svc(); if (s) this.seo.set({ title: s.t, desc: s.d }); });
+  private readonly seoFx = effect(() => { const s = this.svc(); if (s) this.seo.set({ title: this.i.isAr() ? `${s.t} نيسان في فيصل` : `Nissan ${s.t} in Faisal, Giza`, desc: s.d }); });
   protected readonly phone = SITE.phone;
   /** Bound from the `:slug` route param. */
   readonly slug = input<string>();

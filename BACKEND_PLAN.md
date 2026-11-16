@@ -55,16 +55,16 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 - [x] **G1** `AdminUser` entity + password hashing (`PasswordHasher`) + seed owner account from config/user-secrets
 - [x] **G2** `POST /api/auth/login` → JWT (8h), roles `Owner` / `Staff`
 - [x] **G3** `[Authorize]` on `/api/admin/*` + auth in the API docs UI
-- [ ] **G4** Frontend: `/admin/login` page, `AuthService`, token storage, HTTP interceptor, route guard
-- [ ] **G5** Frontend: admin layout (sidebar, top bar, logout), lazy `/admin` routes, `noindex`, skipped by prerender/sitemap
+- [x] **G4** Frontend: `/admin/login` page, `AuthService`, token storage, HTTP interceptor, route guard
+- [x] **G5** Frontend: admin layout (sidebar, top bar, logout), lazy `/admin` routes, `noindex`, skipped by prerender/sitemap
 
 ## H — Admin: bookings
 
 - [x] **H1** `GET /api/admin/bookings?date=&status=&q=&page=`
 - [x] **H2** `PATCH /api/admin/bookings/{id}` status (Confirmed / Cancelled / Done / NoShow) + internal note
-- [ ] **H3** Admin bookings page: Today / This week tabs, booking cards, status buttons, call + WhatsApp buttons
-- [ ] **H4** Admin home: today's count, upcoming, new (unconfirmed) bookings — API done (`GET /api/admin/dashboard`), page pending
-- [ ] **H5** Slot settings: API + page (capacity, close a day, close an hour) — API done (`/api/admin/slots`), page pending
+- [x] **H3** Admin bookings page: Today / This week tabs, booking cards, status buttons, call + WhatsApp buttons
+- [x] **H4** Admin home: today's count, upcoming, new (unconfirmed) bookings
+- [x] **H5** Slot settings: API + page (capacity, close a day, close an hour)
 
 ## I — Products & offers
 
@@ -73,13 +73,13 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 - [x] **I3** Admin CRUD products + categories
 - [x] **I4** Image upload `POST /api/admin/uploads` (jpg/png/webp, size limit) → served from `/uploads`
 - [x] **I5** Admin CRUD offers
-- [ ] **I6** Admin products page (list + form + image)
-- [ ] **I7** Admin offers page
-- [ ] **I8** Frontend public pages (home, products, product details, offers) read from API (loading state + fallback)
+- [x] **I6** Admin products page (list + form + image)
+- [x] **I7** Admin offers page
+- [x] **I8** Frontend public pages (home, products, product details, offers) read from API (loading state + fallback)
 
 ## J — Other content (confirm with client first)
 
-- [ ] **J1** Reviews: entity + public GET + admin add/approve/delete + frontend from API
+- [x] **J1** Reviews: entity + public GET + admin add/approve/delete + frontend from API
 - [ ] **J2** Gallery + before/after: entity + upload + admin page + frontend from API
 - [ ] **J3** Price estimate jobs + model factors in DB + admin edit + frontend from API
 

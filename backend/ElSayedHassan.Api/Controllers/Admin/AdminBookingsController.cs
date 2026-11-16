@@ -14,32 +14,34 @@ public class AdminBookingsController(AppDbContext db, SlotService slots, CairoCl
 {
     /// <summary>Bookings list with filters + paging. Default order: soonest appointment first.</summary>
     [HttpGet]
-    public async Task<ActionResult<PagedDto<AdminBookingDto>>> List([FromQuery] BookingQuery q, CancellationToken ct)
+    public async Task<ActionResult<PagedDto<AdminBookingDto>>> List([FromQuery] BookingQuery filter, CancellationToken ct)
     {
+        // NOTE: the parameter is not named "q" on purpose. The query string has a "q" key, and MVC would
+        // treat that as this object's prefix and bind none of the filters.
         var query = db.Bookings.AsNoTracking();
 
-        if (q.Date is { } d) query = query.Where(b => b.Date == d);
+        if (filter.Date is { } d) query = query.Where(b => b.Date == d);
         else
         {
-            if (q.From is { } f) query = query.Where(b => b.Date >= f);
-            if (q.To is { } t) query = query.Where(b => b.Date <= t);
+            if (filter.From is { } f) query = query.Where(b => b.Date >= f);
+            if (filter.To is { } t) query = query.Where(b => b.Date <= t);
         }
-        if (q.Status is { } s) query = query.Where(b => b.Status == s);
+        if (filter.Status is { } s) query = query.Where(b => b.Status == s);
 
-        if (!string.IsNullOrWhiteSpace(q.Q))
+        if (!string.IsNullOrWhiteSpace(filter.Q))
         {
-            var term = q.Q.Trim();
+            var term = filter.Q.Trim();
             var phone = EgyptPhone.Normalize(term) ?? term;   // "+20 10..." finds "010..."
             query = query.Where(b => b.Code.Contains(term) || b.Name.Contains(term) || b.Phone.Contains(phone));
         }
 
         var total = await query.CountAsync(ct);
-        query = q.Sort?.ToLowerInvariant() == "newest"
+        query = filter.Sort?.ToLowerInvariant() == "newest"
             ? query.OrderByDescending(b => b.CreatedAt).ThenByDescending(b => b.Id)
             : query.OrderBy(b => b.Date).ThenBy(b => b.Hour).ThenBy(b => b.Id);
 
-        var rows = await query.Skip((q.Page - 1) * q.PageSize).Take(q.PageSize).ToListAsync(ct);
-        return new PagedDto<AdminBookingDto>(rows.Select(AdminBookingDto.From).ToList(), total, q.Page, q.PageSize);
+        var rows = await query.Skip((filter.Page - 1) * filter.PageSize).Take(filter.PageSize).ToListAsync(ct);
+        return new PagedDto<AdminBookingDto>(rows.Select(AdminBookingDto.From).ToList(), total, filter.Page, filter.PageSize);
     }
 
     [HttpGet("{id:int}")]

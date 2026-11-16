@@ -4,6 +4,7 @@ import { I18n } from '../core/i18n.service';
 import { waLink } from '../core/site';
 import { Product } from '../data/catalog';
 import { Icon } from './icon';
+import { imgUrl } from '../core/media';
 
 @Component({
   selector: 'app-product-card',
@@ -15,7 +16,8 @@ import { Icon } from './icon';
     <div class="card group relative h-full flex flex-col overflow-hidden transition duration-300 hover:-translate-y-2 hover:border-brand-red/50">
       <a [routerLink]="['/products', p.slug]" class="relative block aspect-[4/3] overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-ink-700 dark:to-ink-900">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_60%,rgba(220,47,54,.18),transparent_65%)] transition duration-500 group-hover:scale-125"></div>
-        <app-icon [name]="p.icon" class="absolute inset-0 m-auto w-14 h-14 sm:w-20 sm:h-20 -translate-y-2 sm:translate-y-0 text-brand-red2/80 transition duration-500 group-hover:scale-110 group-hover:-rotate-6" />
+        @if (p.img) { <img [src]="src(p.img)" [alt]="i.l(p.name)" loading="lazy" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-105"> }
+        @else { <app-icon [name]="p.icon" class="absolute inset-0 m-auto w-14 h-14 sm:w-20 sm:h-20 -translate-y-2 sm:translate-y-0 text-brand-red2/80 transition duration-500 group-hover:scale-110 group-hover:-rotate-6" /> }
         <span class="absolute bottom-2.5 sm:bottom-3 inset-x-0 text-center font-[Arial] font-black tracking-[2px] sm:tracking-[3px] text-[10px] sm:text-xs text-zinc-400 dark:text-zinc-500">{{ p.brand.toUpperCase() }}</span>
         <div class="absolute top-3 start-3 flex flex-col gap-1.5 items-start">
           @if (off()) { <span class="px-2.5 py-1 rounded-lg bg-brand-red text-white text-xs font-black" dir="ltr">-{{ off() }}%</span> }
@@ -45,6 +47,7 @@ import { Icon } from './icon';
 })
 export class ProductCard {
   protected readonly i = inject(I18n);
+  protected readonly src = imgUrl;
   readonly product = input.required<Product>();
   protected readonly off = computed(() => {
     const p = this.product();

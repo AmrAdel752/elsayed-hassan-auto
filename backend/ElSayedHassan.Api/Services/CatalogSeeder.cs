@@ -8,18 +8,22 @@ namespace ElSayedHassan.Api.Services;
 
 /// <summary>
 /// First start only: fills empty content tables from Data/Seed/catalog.json:
-/// categories + products + offers (when ALL three are empty) and reviews (when the reviews table is empty).
+/// categories + products + offers (when ALL three are empty), reviews (when that table is empty) and
+/// gallery tiles + before/after pairs (when both are empty).
 /// The JSON is generated from the frontend's static data: <c>node scripts/export-seed.mts</c> (in frontend/).
 /// After that the dashboard owns the data; the seed never overwrites or re-adds anything.
 /// </summary>
 public static class CatalogSeeder
 {
-    private record SeedFile(List<SeedCategory> Categories, List<SeedProduct> Products, List<SeedOffer> Offers, List<SeedReview>? Reviews);
+    private record SeedFile(List<SeedCategory> Categories, List<SeedProduct> Products, List<SeedOffer> Offers, List<SeedReview>? Reviews,
+        List<SeedGalleryItem>? Gallery, List<SeedBeforeAfter>? BeforeAfter);
     private record SeedCategory(string Id, string Icon, TrDto Name);
     private record SeedProduct(string Slug, string Cat, string Icon, string Brand, TrDto Name, TrDto Desc, decimal Price,
         decimal? OldPrice, List<string> Models, bool InStock, bool Featured, TrDto? Badge);
     private record SeedOffer(string Id, string Icon, TrDto Title, TrDto Desc, TrDto Discount, decimal? Price, decimal? OldPrice,
         DateTimeOffset EndsAt, string? Service, List<TrDto> Includes);
+    private record SeedGalleryItem(string Cat, string Icon, bool Tall, TrDto Title, string? Img);
+    private record SeedBeforeAfter(string Icon, TrDto Title, TrDto Desc, string? Before, string? After);
     private record SeedReview(TrDto Name, string? Model, int? Year, string? Service, int Rating, DateOnly Date, TrDto Text);
 
     public static async Task SeedAsync(IServiceProvider services)
@@ -33,7 +37,8 @@ public static class CatalogSeeder
         {
             var catalogEmpty = !await db.Categories.AnyAsync() && !await db.Products.AnyAsync() && !await db.Offers.AnyAsync();
             var reviewsEmpty = !await db.Reviews.AnyAsync();
-            if (!catalogEmpty && !reviewsEmpty) return;
+            var galleryEmpty = !await db.GalleryItems.AnyAsync() && !await db.BeforeAfters.AnyAsync();
+            if (!catalogEmpty && !reviewsEmpty && !galleryEmpty) return;
 
             var path = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "catalog.json");
             if (!File.Exists(path)) { log.LogWarning("Seed file not found: {Path}", path); return; }
@@ -77,6 +82,20 @@ public static class CatalogSeeder
                 }));
                 await db.SaveChangesAsync();
                 log.LogInformation("Reviews seeded: {R}.", reviews.Count);
+            }
+
+            if (galleryEmpty && (seed.Gallery?.Count > 0 || seed.BeforeAfter?.Count > 0))
+            {
+                db.GalleryItems.AddRange((seed.Gallery ?? []).Select((g, i) => new GalleryItem
+                {
+                    Category = g.Cat, Icon = g.Icon, Tall = g.Tall, Title = g.Title.ToEntity(), ImageUrl = g.Img, SortOrder = i,
+                }));
+                db.BeforeAfters.AddRange((seed.BeforeAfter ?? []).Select((b, i) => new BeforeAfter
+                {
+                    Icon = b.Icon, Title = b.Title.ToEntity(), Desc = b.Desc.ToEntity(), BeforeUrl = b.Before, AfterUrl = b.After, SortOrder = i,
+                }));
+                await db.SaveChangesAsync();
+                log.LogInformation("Gallery seeded: {G} tiles, {B} before/after pairs.", seed.Gallery?.Count ?? 0, seed.BeforeAfter?.Count ?? 0);
             }
         }
         catch (Exception ex)

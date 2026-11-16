@@ -14,6 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Offer> Offers => Set<Offer>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<GalleryItem> GalleryItems => Set<GalleryItem>();
+    public DbSet<BeforeAfter> BeforeAfters => Set<BeforeAfter>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

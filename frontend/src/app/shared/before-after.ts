@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { I18n } from '../core/i18n.service';
+import { imgUrl } from '../core/media';
 import { BeforeAfter as Item } from '../data/gallery';
 import { Icon } from './icon';
 
@@ -15,7 +16,7 @@ import { Icon } from './icon';
       <div class="relative aspect-[16/11] select-none touch-pan-y" dir="ltr">
         <!-- after (full) -->
         <div class="absolute inset-0">
-          @if (it.after) { <img [src]="it.after" alt="" class="w-full h-full object-cover"> }
+          @if (it.after) { <img [src]="src(it.after)" alt="" loading="lazy" class="w-full h-full object-cover"> }
           @else {
             <div class="w-full h-full grid place-items-center bg-gradient-to-br from-brand-red2 via-brand-red to-[#741419]">
               <div class="absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,.25)_45%,transparent_55%)]"></div>
@@ -25,7 +26,7 @@ import { Icon } from './icon';
         </div>
         <!-- before (clipped from the right edge to the handle) -->
         <div class="absolute inset-0" [style.clip-path]="'inset(0 ' + (100 - pos()) + '% 0 0)'">
-          @if (it.before) { <img [src]="it.before" alt="" class="w-full h-full object-cover"> }
+          @if (it.before) { <img [src]="src(it.before)" alt="" loading="lazy" class="w-full h-full object-cover"> }
           @else {
             <div class="w-full h-full grid place-items-center bg-gradient-to-br from-[#57534e] via-[#3f3a36] to-[#1c1917]">
               <div class="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_20%_30%,rgba(120,72,30,.6)_0_6%,transparent_7%),radial-gradient(circle_at_70%_60%,rgba(80,50,20,.6)_0_9%,transparent_10%),radial-gradient(circle_at_45%_80%,rgba(0,0,0,.5)_0_5%,transparent_6%),radial-gradient(circle_at_85%_20%,rgba(120,72,30,.5)_0_4%,transparent_5%)]"></div>
@@ -56,4 +57,5 @@ export class BeforeAfterSlider {
   protected readonly i = inject(I18n);
   readonly item = input.required<Item>();
   protected readonly pos = signal(50);
+  protected readonly src = imgUrl;
 }

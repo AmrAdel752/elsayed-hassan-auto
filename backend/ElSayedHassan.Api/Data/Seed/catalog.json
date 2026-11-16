@@ -611,5 +611,156 @@
         "en": "A/C was blowing warm air — they found the leak with their detector and fixed it. Honest work."
       }
     }
+  ],
+  "gallery": [
+    {
+      "id": 1,
+      "cat": "workshop",
+      "icon": "car",
+      "tall": true,
+      "title": {
+        "ar": "صالة الاستقبال والورشة",
+        "en": "Reception and workshop floor"
+      }
+    },
+    {
+      "id": 2,
+      "cat": "work",
+      "icon": "cpu",
+      "title": {
+        "ar": "فحص كمبيوتر لموتور قشقاي",
+        "en": "Computer diagnosis on a Qashqai"
+      }
+    },
+    {
+      "id": 3,
+      "cat": "work",
+      "icon": "susp",
+      "title": {
+        "ar": "تغيير مساعدين صني",
+        "en": "Sunny shock replacement"
+      }
+    },
+    {
+      "id": 4,
+      "cat": "cars",
+      "icon": "car",
+      "title": {
+        "ar": "نيسان سنترا بعد الصيانة",
+        "en": "Nissan Sentra after service"
+      }
+    },
+    {
+      "id": 5,
+      "cat": "workshop",
+      "icon": "engine",
+      "title": {
+        "ar": "روافع هيدروليك",
+        "en": "Hydraulic lifts"
+      }
+    },
+    {
+      "id": 6,
+      "cat": "work",
+      "icon": "ac",
+      "tall": true,
+      "title": {
+        "ar": "شحن فريون وكشف تسريب",
+        "en": "A/C recharge and leak test"
+      }
+    },
+    {
+      "id": 7,
+      "cat": "cars",
+      "icon": "car",
+      "tall": true,
+      "title": {
+        "ar": "إكس تريل جاهزة للتسليم",
+        "en": "X-Trail ready for pickup"
+      }
+    },
+    {
+      "id": 8,
+      "cat": "work",
+      "icon": "oil",
+      "title": {
+        "ar": "تغيير زيت فتيس CVT",
+        "en": "CVT fluid exchange"
+      }
+    },
+    {
+      "id": 9,
+      "cat": "workshop",
+      "icon": "parts",
+      "title": {
+        "ar": "مخزن قطع الغيار",
+        "en": "Spare parts store"
+      }
+    },
+    {
+      "id": 10,
+      "cat": "work",
+      "icon": "engine",
+      "title": {
+        "ar": "عَمرة موتور",
+        "en": "Engine overhaul"
+      }
+    },
+    {
+      "id": 11,
+      "cat": "cars",
+      "icon": "car",
+      "title": {
+        "ar": "باترول في الورشة",
+        "en": "Patrol in the workshop"
+      }
+    },
+    {
+      "id": 12,
+      "cat": "workshop",
+      "icon": "shield",
+      "title": {
+        "ar": "منطقة فحص الجودة",
+        "en": "Quality check area"
+      }
+    }
+  ],
+  "beforeAfter": [
+    {
+      "id": 1,
+      "icon": "engine",
+      "title": {
+        "ar": "تنظيف وصيانة الموتور",
+        "en": "Engine cleaning & service"
+      },
+      "desc": {
+        "ar": "موتور سنترا قبل وبعد التنظيف وتغيير الحساسات.",
+        "en": "A Sentra engine before and after cleaning and sensor replacement."
+      }
+    },
+    {
+      "id": 2,
+      "icon": "susp",
+      "title": {
+        "ar": "تجديد العفشة الأمامية",
+        "en": "Front suspension renewal"
+      },
+      "desc": {
+        "ar": "مقصات وجلب ومساعدين جداد لعربية صني.",
+        "en": "New control arms, bushings and shocks on a Sunny."
+      }
+    },
+    {
+      "id": 3,
+      "icon": "parts",
+      "title": {
+        "ar": "تغيير طنابير وتيل الفرامل",
+        "en": "Brake discs & pads"
+      },
+      "desc": {
+        "ar": "طنابير مستهلكة اتغيرت بطقم جديد.",
+        "en": "Worn discs replaced with a new set."
+      }
+    }
   ]
 }

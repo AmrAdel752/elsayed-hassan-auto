@@ -67,6 +67,44 @@ namespace ElSayedHassan.Api.Data.Migrations
                     b.ToTable("AdminUsers");
                 });
 
+            modelBuilder.Entity("ElSayedHassan.Api.Entities.BeforeAfter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AfterUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("BeforeUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BeforeAfters", (string)null);
+                });
+
             modelBuilder.Entity("ElSayedHassan.Api.Entities.Booking", b =>
                 {
                     b.Property<int>("Id")
@@ -238,6 +276,51 @@ namespace ElSayedHassan.Api.Data.Migrations
                     b.ToTable("ClosedSlots", t =>
                         {
                             t.HasCheckConstraint("CK_ClosedSlots_Hour", "[Hour] BETWEEN 0 AND 23");
+                        });
+                });
+
+            modelBuilder.Entity("ElSayedHassan.Api.Entities.GalleryItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Tall")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GalleryItems", t =>
+                        {
+                            t.HasCheckConstraint("CK_GalleryItems_Category", "[Category] IN ('workshop', 'work', 'cars')");
                         });
                 });
 
@@ -470,6 +553,61 @@ namespace ElSayedHassan.Api.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ElSayedHassan.Api.Entities.BeforeAfter", b =>
+                {
+                    b.OwnsOne("ElSayedHassan.Api.Entities.Tr", "Desc", b1 =>
+                        {
+                            b1.Property<int>("BeforeAfterId")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Ar")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.Property<string>("En")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.HasKey("BeforeAfterId");
+
+                            b1.ToTable("BeforeAfters");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BeforeAfterId");
+                        });
+
+                    b.OwnsOne("ElSayedHassan.Api.Entities.Tr", "Title", b1 =>
+                        {
+                            b1.Property<int>("BeforeAfterId")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Ar")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.Property<string>("En")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.HasKey("BeforeAfterId");
+
+                            b1.ToTable("BeforeAfters");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BeforeAfterId");
+                        });
+
+                    b.Navigation("Desc")
+                        .IsRequired();
+
+                    b.Navigation("Title")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ElSayedHassan.Api.Entities.Category", b =>
                 {
                     b.OwnsOne("ElSayedHassan.Api.Entities.Tr", "Name", b1 =>
@@ -496,6 +634,35 @@ namespace ElSayedHassan.Api.Data.Migrations
                         });
 
                     b.Navigation("Name")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ElSayedHassan.Api.Entities.GalleryItem", b =>
+                {
+                    b.OwnsOne("ElSayedHassan.Api.Entities.Tr", "Title", b1 =>
+                        {
+                            b1.Property<int>("GalleryItemId")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Ar")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.Property<string>("En")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.HasKey("GalleryItemId");
+
+                            b1.ToTable("GalleryItems");
+
+                            b1.WithOwner()
+                                .HasForeignKey("GalleryItemId");
+                        });
+
+                    b.Navigation("Title")
                         .IsRequired();
                 });
 

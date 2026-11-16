@@ -8,7 +8,7 @@ import { I18n } from '../core/i18n.service';
 const AR = {
   title: 'لوحة التحكم', brand: 'السيد حسن أوتو', menu: 'القائمة', close: 'إغلاق', site: 'عرض الموقع', logout: 'خروج',
   role: { Owner: 'صاحب المركز', Staff: 'موظف' },
-  nav: { home: 'الرئيسية', bookings: 'الحجوزات', slots: 'المواعيد', products: 'المنتجات', offers: 'العروض', reviews: 'آراء العملاء' },
+  nav: { home: 'الرئيسية', bookings: 'الحجوزات', slots: 'المواعيد', products: 'المنتجات', offers: 'العروض', reviews: 'آراء العملاء', gallery: 'المعرض' },
   loading: 'جاري التحميل...', failed: 'حصلت مشكلة — جرّب تاني.', retry: 'إعادة المحاولة',
   save: 'حفظ', saving: 'جاري الحفظ...', saved: 'اتحفظ ✓', deleted: 'اتمسح ✓', cancel: 'إلغاء', edit: 'تعديل', del: 'مسح',
   hide: 'إخفاء', show: 'إظهار', hidden: 'مخفي', slugTaken: 'الرابط ده مستخدم قبل كده — غيّره.',
@@ -74,12 +74,24 @@ const AR = {
     enHint: 'لو سبتها فاضية، زوار النسخة الإنجليزي هيشوفوا النص العربي.',
     rating: 'التقييم', date: 'التاريخ', model: 'موديل العربية', year: 'سنة الصنع', service: 'الخدمة', none: 'غير محدد', empty: 'مفيش آراء لسه.',
   },
+  gallery: {
+    h: 'المعرض', tabs: { tiles: 'صور المعرض', pairs: 'قبل وبعد' },
+    count: (shown: number, total: number) => `${shown} ظاهر في الموقع من ${total}`,
+    addTile: 'إضافة صورة', addTileH: 'صورة جديدة', editTileH: 'تعديل الصورة',
+    addPair: 'إضافة قبل وبعد', addPairH: 'قبل وبعد جديد', editPairH: 'تعديل قبل وبعد',
+    titleAr: 'العنوان', titleEn: 'العنوان بالإنجليزي (اختياري)', descAr: 'الوصف', descEn: 'الوصف بالإنجليزي (اختياري)',
+    enHint: 'لو سبتها فاضية، زوار النسخة الإنجليزي هيشوفوا النص العربي.',
+    cat: 'القسم', cats: { workshop: 'الورشة', work: 'شغلنا', cars: 'عربيات العملاء' },
+    tall: 'صورة طولية (بتاخد مساحة أكبر)', before: 'صورة قبل', after: 'صورة بعد',
+    noImg: 'من غير صورة — بيظهر رسم مكانها', iconHint: 'بتظهر لو مفيش صورة.',
+    emptyTiles: 'مفيش صور لسه.', emptyPairs: 'مفيش قبل وبعد لسه.',
+  },
 };
 
 const EN: typeof AR = {
   title: 'Dashboard', brand: 'El Sayed Hassan Auto', menu: 'Menu', close: 'Close', site: 'View website', logout: 'Sign out',
   role: { Owner: 'Owner', Staff: 'Staff' },
-  nav: { home: 'Home', bookings: 'Bookings', slots: 'Time slots', products: 'Products', offers: 'Offers', reviews: 'Reviews' },
+  nav: { home: 'Home', bookings: 'Bookings', slots: 'Time slots', products: 'Products', offers: 'Offers', reviews: 'Reviews', gallery: 'Gallery' },
   loading: 'Loading...', failed: 'Something went wrong — try again.', retry: 'Retry',
   save: 'Save', saving: 'Saving...', saved: 'Saved ✓', deleted: 'Deleted ✓', cancel: 'Cancel', edit: 'Edit', del: 'Delete',
   hide: 'Hide', show: 'Show', hidden: 'Hidden', slugTaken: 'This link is already used — change it.',
@@ -144,6 +156,18 @@ const EN: typeof AR = {
     nameAr: 'Customer name', nameEn: 'Name in English (optional)', textAr: 'Review', textEn: 'Review in English (optional)',
     enHint: 'If left empty, English visitors see the Arabic text.',
     rating: 'Rating', date: 'Date', model: 'Car model', year: 'Model year', service: 'Service', none: 'Not set', empty: 'No reviews yet.',
+  },
+  gallery: {
+    h: 'Gallery', tabs: { tiles: 'Gallery photos', pairs: 'Before & after' },
+    count: (shown: number, total: number) => `${shown} of ${total} shown on the website`,
+    addTile: 'Add photo', addTileH: 'New photo', editTileH: 'Edit photo',
+    addPair: 'Add before & after', addPairH: 'New before & after', editPairH: 'Edit before & after',
+    titleAr: 'Title', titleEn: 'Title in English (optional)', descAr: 'Description', descEn: 'Description in English (optional)',
+    enHint: 'If left empty, English visitors see the Arabic text.',
+    cat: 'Section', cats: { workshop: 'Workshop', work: 'Our work', cars: 'Customer cars' },
+    tall: 'Tall photo (takes more space)', before: 'Before photo', after: 'After photo',
+    noImg: 'No photo — a drawing is shown instead', iconHint: 'Shown when there is no photo.',
+    emptyTiles: 'No photos yet.', emptyPairs: 'No before & after yet.',
   },
 };
 

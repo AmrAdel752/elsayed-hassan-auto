@@ -14,6 +14,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'products', data: { seo: 'admin' }, loadComponent: () => import('./admin-products').then(m => m.AdminProducts) },
       { path: 'offers', data: { seo: 'admin' }, loadComponent: () => import('./admin-offers').then(m => m.AdminOffers) },
       { path: 'reviews', data: { seo: 'admin' }, loadComponent: () => import('./admin-reviews').then(m => m.AdminReviews) },
+      { path: 'gallery', data: { seo: 'admin' }, loadComponent: () => import('./admin-gallery').then(m => m.AdminGallery) },
       { path: '**', redirectTo: '' },
     ],
   },

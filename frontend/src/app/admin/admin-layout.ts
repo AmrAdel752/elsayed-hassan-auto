@@ -67,5 +67,6 @@ export class AdminLayout {
     { path: '/admin/products', key: 'products', icon: 'parts' },
     { path: '/admin/offers', key: 'offers', icon: 'gift' },
     { path: '/admin/reviews', key: 'reviews', icon: 'star' },
+    { path: '/admin/gallery', key: 'gallery', icon: 'paint' },
   ] as const;
 }

@@ -45,6 +45,18 @@ export interface ReviewInput {
   model?: string | null; year?: number | null; service?: string | null; rating: number; date: string; isVisible: boolean;
 }
 
+export type GalleryCat = 'workshop' | 'work' | 'cars';
+export interface GalleryTile { id: number; cat: GalleryCat; icon: string; tall: boolean; title: Tr; img?: string | null; sortOrder: number; isVisible: boolean; }
+/** Arabic is required; English is optional (the API falls back to the Arabic text). */
+export interface GalleryTileInput {
+  cat: GalleryCat; icon: string; tall: boolean; titleAr: string; titleEn?: string | null; img?: string | null; sortOrder: number; isVisible: boolean;
+}
+export interface BeforeAfterPair { id: number; icon: string; title: Tr; desc: Tr; before?: string | null; after?: string | null; sortOrder: number; isVisible: boolean; }
+export interface BeforeAfterInput {
+  icon: string; titleAr: string; titleEn?: string | null; descAr: string; descEn?: string | null;
+  before?: string | null; after?: string | null; sortOrder: number; isVisible: boolean;
+}
+
 type Query = Record<string, string | number | boolean | undefined | null>;
 const clean = (q: Query) => Object.fromEntries(Object.entries(q).filter(([, v]) => v !== undefined && v !== null && v !== '')) as Record<string, string | number | boolean>;
 
@@ -91,6 +103,18 @@ export class AdminApi {
     return id ? this.http.put<Review>(`${this.base}/reviews/${id}`, r) : this.http.post<Review>(`${this.base}/reviews`, r);
   }
   deleteReview(id: number) { return this.http.delete<void>(`${this.base}/reviews/${id}`); }
+
+  gallery() { return this.http.get<GalleryTile[]>(`${this.base}/gallery`); }
+  saveGalleryTile(id: number | null, g: GalleryTileInput) {
+    return id ? this.http.put<GalleryTile>(`${this.base}/gallery/${id}`, g) : this.http.post<GalleryTile>(`${this.base}/gallery`, g);
+  }
+  deleteGalleryTile(id: number) { return this.http.delete<void>(`${this.base}/gallery/${id}`); }
+
+  beforeAfter() { return this.http.get<BeforeAfterPair[]>(`${this.base}/before-after`); }
+  saveBeforeAfter(id: number | null, b: BeforeAfterInput) {
+    return id ? this.http.put<BeforeAfterPair>(`${this.base}/before-after/${id}`, b) : this.http.post<BeforeAfterPair>(`${this.base}/before-after`, b);
+  }
+  deleteBeforeAfter(id: number) { return this.http.delete<void>(`${this.base}/before-after/${id}`); }
 
   /** Upload one image; returns its path (/uploads/...). */
   upload(file: File) {

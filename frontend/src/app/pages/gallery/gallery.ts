@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { I18n } from '../../core/i18n.service';
-import { BEFORE_AFTER, GALLERY, GalleryItem } from '../../data/gallery';
+import { GalleryStore } from '../../core/gallery.store';
+import { imgUrl } from '../../core/media';
+import { GalleryItem } from '../../data/gallery';
 import { PageBanner } from '../../shared/page-banner';
 import { BeforeAfterSlider } from '../../shared/before-after';
 import { CtaBand } from '../../shared/cta-band';
@@ -36,7 +38,7 @@ const TILE_BG: Record<string, string> = {
           @for (g of list(); track g.id) {
             <button type="button" (click)="open.set(g)" [class.row-span-2]="g.tall"
                     class="group relative overflow-hidden rounded-2xl text-start bg-gradient-to-br {{ bg(g) }}">
-              @if (g.img) { <img [src]="g.img" alt="" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"> }
+              @if (g.img) { <img [src]="src(g.img)" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110"> }
               @else {
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_60%_40%,rgba(255,255,255,.12),transparent_60%)]"></div>
                 <app-icon [name]="g.icon" class="absolute inset-0 m-auto w-14 h-14 md:w-20 md:h-20 text-white/80 transition duration-500 group-hover:scale-110" />
@@ -48,19 +50,21 @@ const TILE_BG: Record<string, string> = {
             </button>
           }
         </div>
-        <p class="muted text-xs text-center mt-4">{{ i.t('gal.note') }}</p>
+        @if (placeholders()) { <p class="muted text-xs text-center mt-4">{{ i.t('gal.note') }}</p> }
       </div>
     </section>
 
     <!-- before / after -->
+    @if (beforeAfter().length) {
     <section class="py-14 md:py-24 bg-gradient-to-b from-zinc-50 via-zinc-100 to-zinc-50 dark:from-ink-900 dark:via-ink-800 dark:to-ink-900">
       <div class="wrap">
         <div reveal class="sec-head"><span class="tag">{{ i.t('gal.baTag') }}</span><h2 class="h2" [innerHTML]="i.t('gal.baH')"></h2><p class="muted">{{ i.t('gal.baP') }}</p></div>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          @for (b of beforeAfter; track b.id) { <app-before-after [item]="b" /> }
+          @for (b of beforeAfter(); track b.id) { <app-before-after [item]="b" /> }
         </div>
       </div>
     </section>
+    }
 
     <div class="pt-14 md:pt-20"><app-cta-band /></div>
 
@@ -69,7 +73,7 @@ const TILE_BG: Record<string, string> = {
       <div class="fixed inset-0 z-[90] bg-black/85 backdrop-blur-sm grid place-items-center p-4" (click)="open.set(null)">
         <div class="relative w-full max-w-[720px]" (click)="$event.stopPropagation()">
           <div class="relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br {{ bg(g) }}">
-            @if (g.img) { <img [src]="g.img" alt="" class="w-full h-full object-cover"> }
+            @if (g.img) { <img [src]="src(g.img)" alt="" class="w-full h-full object-cover"> }
             @else { <app-icon [name]="g.icon" class="absolute inset-0 m-auto w-32 h-32 text-white/85" /> }
           </div>
           <div class="flex items-center justify-between gap-3 mt-4 text-white">
@@ -86,10 +90,14 @@ const TILE_BG: Record<string, string> = {
 export class Gallery {
   protected readonly i = inject(I18n);
   protected readonly cats = ['all', 'workshop', 'work', 'cars'] as const;
-  protected readonly beforeAfter = BEFORE_AFTER;
+  private readonly store = inject(GalleryStore);
+  protected readonly src = imgUrl;
+  protected readonly beforeAfter = this.store.beforeAfter;
+  /** "Real photos coming soon" only while every tile is still a drawn placeholder. */
+  protected readonly placeholders = computed(() => !this.store.items().some(g => g.img));
   protected readonly cat = signal<string>('all');
   protected readonly open = signal<GalleryItem | null>(null);
-  protected readonly list = computed(() => GALLERY.filter(g => this.cat() === 'all' || g.cat === this.cat()));
+  protected readonly list = computed(() => this.store.items().filter(g => this.cat() === 'all' || g.cat === this.cat()));
 
   protected label(c: string): string { return (this.i.dict().gal.cats as Record<string, string>)[c]; }
   protected bg(g: GalleryItem) { return TILE_BG[g.cat]; }

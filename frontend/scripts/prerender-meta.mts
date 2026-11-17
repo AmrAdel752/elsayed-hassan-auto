@@ -183,9 +183,14 @@ for (const r of routes) {
     `<h1>${esc(h1)}</h1><p>${esc(r.desc)}</p>${r.body ?? ''}${NAV}</div>`;
   html = html.replace(/<app-root><\/app-root>/, () => `<app-root>${text}</app-root>`);
 
-  const out = join(dist, r.path, 'index.html');
-  mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, html);
+  // `services.html` lets Cloudflare Pages answer /services itself (with only services/index.html it 308-redirects
+  // to /services/, which doesn't match the canonical URLs or the sitemap). services/index.html is kept for other hosts.
+  const outs = [join(dist, r.path, 'index.html')];
+  if (r.path) outs.push(join(dist, `${r.path}.html`));
+  for (const out of outs) {
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, html);
+  }
 }
 
 const today = new Date().toISOString().slice(0, 10);

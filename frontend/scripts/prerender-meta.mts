@@ -17,12 +17,10 @@ import { PRODUCTS } from '../src/app/data/catalog.ts';
 import { CAR_MODELS } from '../src/app/data/models.ts';
 import { TIPS } from '../src/app/data/tips.ts';
 
-// Site address used in link previews + sitemap. Order: SITE_URL env (set it once the real domain
-// exists) → Vercel's production URL (set automatically on Vercel) → placeholder.
+// Site address used in link previews + sitemap: the SITE_URL env var if set, else the real domain.
 // The placeholder written in src/index.html and public/robots.txt is swapped for it below.
 const PLACEHOLDER = 'https://elsayedhassanauto.com';
-const vercel = process.env['VERCEL_PROJECT_PRODUCTION_URL'];
-const DOMAIN = (process.env['SITE_URL'] || (vercel ? `https://${vercel}` : PLACEHOLDER)).replace(/\/$/, '');
+const DOMAIN = (process.env['SITE_URL'] || PLACEHOLDER).replace(/\/$/, '');
 
 const root = dirname(fileURLToPath(import.meta.url));
 const dist = join(root, '../dist/frontend/browser');

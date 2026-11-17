@@ -9,12 +9,12 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 - Keep each task small; don't read big files you don't need (`i18n/ar.ts`, `i18n/en.ts` are large — grep them).
 - Frontend: `frontend/` (Angular 22, standalone, signals, Tailwind v4, AR/EN). Overview of what exists: `ROADMAP.md`.
 - Backend goes in a new folder: `backend/` (repo root). Never commit secrets (use user-secrets locally, host env vars in production).
-- Live site: https://elsayedhassanauto.com (Vercel, auto-deploys on push to `main`). API will be `https://api.elsayedhassanauto.com`.
+- Live site: https://elsayedhassanauto.com (Cloudflare Pages project `elsayed-hassan-auto`, auto-deploys on push to `main`; DNS on Cloudflare, www → root 301 rule). API will be `https://api.elsayedhassanauto.com`.
 - Keep `frontend/src/app/data/*.ts` — they are the seed data for the DB and are also used by `scripts/prerender-meta.mts` at build time.
 
 ## Decisions already made
 
-- Hosting for API + DB: **MonsterASP.NET** (free/cheap, supports .NET + SQL Server). Vercel can't run .NET.
+- Hosting for API + DB: **MonsterASP.NET** (free/cheap, supports .NET + SQL Server). Cloudflare Pages can't run .NET.
 - Admin = Angular `/admin` route, lazy-loaded, `noindex`.
 - Car **tracking** page: postponed (not built in the backend for now). Booking → WhatsApp stays.
 - Services, tips and model pages stay static in the frontend for now.
@@ -88,8 +88,8 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 - [ ] **K1** MonsterASP.NET: create site + SQL Server DB
 - [ ] **K2** Production settings via host env vars: connection string, JWT key, CORS origins, owner password
 - [ ] **K3** Publish API + apply migrations + seed
-- [ ] **K4** Namecheap DNS: `api` record → host, SSL on `api.elsayedhassanauto.com`
-- [ ] **K5** Frontend `environment.prod.ts` → API URL, push (Vercel redeploys), full booking test on the live site
+- [ ] **K4** Cloudflare DNS: `api` record → host, SSL on `api.elsayedhassanauto.com`
+- [ ] **K5** Frontend `environment.ts` → API URL, push (Cloudflare Pages redeploys), full booking test on the live site
 - [ ] **K6** DB backups (host backups or weekly export)
 
 ## Later (optional)

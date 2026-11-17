@@ -1,4 +1,4 @@
-# Cloudflare Pages response headers (same as the "headers" block in vercel.json).
+# Cloudflare Pages response headers: keep the dashboard out of search engines.
 /admin
   X-Robots-Tag: noindex, nofollow
 /admin/*

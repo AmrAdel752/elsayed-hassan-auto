@@ -1,0 +1,5 @@
+# Cloudflare Pages response headers (same as the "headers" block in vercel.json).
+/admin
+  X-Robots-Tag: noindex, nofollow
+/admin/*
+  X-Robots-Tag: noindex, nofollow

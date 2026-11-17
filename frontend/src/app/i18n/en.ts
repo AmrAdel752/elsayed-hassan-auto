@@ -36,7 +36,7 @@ export const EN: Dict = {
     {
       slug: 'mechanics', icon: 'engine', t: 'Mechanics', d: 'Precise engine and gearbox repair with accurate fault diagnosis.',
       long: 'From a strange engine noise to a full overhaul — our technicians specialize in every Nissan engine and gearbox (manual, automatic, CVT). We start with an accurate computer diagnosis and tell you the issue and cost before touching the car.',
-      includes: ['Computer engine diagnostics', 'Engine repair and overhaul', 'CVT and automatic gearbox service', 'Timing chain and pump replacement', 'Oil and coolant leak repair', 'Sensor and injector cleaning (on-car)'],
+      includes: ['Computer engine diagnostics', 'Engine repair and overhaul', 'CVT and automatic gearbox service', 'Timing chain and pump replacement', 'Oil and coolant leak repair', 'Sensor, injector and catalytic converter cleaning'],
       time: '2 hours to 1 day', warranty: 'Warranty on labor and parts',
       faq: [['How long does a computer diagnosis take?', 'About 10 minutes, and you get the issue and cost right away.'], ['Do you service CVT gearboxes?', 'Yes — it is one of our core Nissan specialties.']],
     },

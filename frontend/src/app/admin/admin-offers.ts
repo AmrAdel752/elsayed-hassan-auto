@@ -7,7 +7,9 @@ import { AdminApi, Offer, OfferInput } from './admin-api';
 import { apiError, slugify } from './admin-ui';
 import { ICONS } from './admin-products';
 import { ImageInput } from './image-input';
+import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
+import { ConfirmService } from './confirm-dialog';
 
 /** `endsLocal` = value of the datetime-local input (the browser's local time). */
 type OfferForm = OfferInput & { id: number | null; endsLocal: string };
@@ -21,17 +23,16 @@ const toLocal = (iso: string) => {
 /** Offers: list (incl. hidden and finished ones) + add/edit form. */
 @Component({
   selector: 'app-admin-offers',
-  imports: [FormsModule, Icon, ImageInput],
+  imports: [FormsModule, Icon, ImageInput, AdminFlash],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @let T = t().offers; @let C = t();
+    @let T = t().offers; @let C = t(); @let P = t().products;
     <div class="flex flex-wrap items-center gap-3 mb-5">
       <h1 class="text-2xl md:text-3xl font-black flex-1">{{ T.h }}</h1>
       <button type="button" class="btn btn-red !py-2.5" (click)="edit(null)">+ {{ T.add }}</button>
     </div>
 
-    @if (msg()) { <p class="mb-4 rounded-xl border p-3 text-sm font-bold" role="status"
-      [class]="msgBad() ? 'border-brand-red/40 bg-brand-red/10 text-brand-red2' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'">{{ msg() }}</p> }
+    @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
     @if (form(); as f) {
       <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save()" #of="ngForm">
@@ -45,6 +46,8 @@ const toLocal = (iso: string) => {
           <label><span class="lbl">{{ T.discountEn }}</span><input class="field" name="disen" dir="ltr" required maxlength="60" placeholder="Save 18%" [(ngModel)]="f.discount.en"></label>
           <label><span class="lbl">{{ T.price }}</span><input class="field" type="number" name="price" min="0" step="0.01" [(ngModel)]="f.price"></label>
           <label><span class="lbl">{{ T.oldPrice }}</span><input class="field" type="number" name="old" min="0" step="0.01" [(ngModel)]="f.oldPrice"></label>
+          <label class="sm:col-span-2"><span class="lbl">{{ P.cost }}</span><input class="field sm:max-w-[calc(50%-0.5rem)]" type="number" name="cost" min="0" step="0.01" [(ngModel)]="f.cost">
+            <small class="muted text-xs block">{{ P.costHint }}</small></label>
           <label><span class="lbl">{{ T.endsAt }}</span><input class="field" type="datetime-local" name="ends" required [(ngModel)]="f.endsLocal"></label>
           <label><span class="lbl">{{ T.service }}</span>
             <select class="field" name="service" [(ngModel)]="f.service">
@@ -104,8 +107,14 @@ const toLocal = (iso: string) => {
                 @if (!o.isActive) { <span class="rounded-full bg-zinc-500/15 px-2 py-0.5">{{ C.hidden }}</span> }
               </div>
             </div>
-            @if (o.price) { <div class="text-end shrink-0"><b class="block">{{ i.price(o.price) }}</b>
-              @if (o.oldPrice) { <small class="muted line-through">{{ i.price(o.oldPrice) }}</small> }</div> }
+            @if (o.price || o.cost != null) { <div class="text-end shrink-0">
+              @if (o.price) { <b class="block">{{ i.price(o.price) }}</b> }
+              @if (o.oldPrice) { <small class="muted line-through">{{ i.price(o.oldPrice) }}</small> }
+              @if (o.cost != null) {
+                <small class="block text-[11px] font-bold muted">{{ P.costIs }} {{ i.price(o.cost) }}
+                  @if (o.price != null) { · <span [class]="o.price - o.cost >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-brand-red2'">{{ P.profit }} {{ i.price(o.price - o.cost) }}</span> }</small>
+              }
+            </div> }
             <div class="flex flex-col sm:flex-row gap-1 sm:gap-3 shrink-0 text-sm font-bold">
               <button type="button" class="hover:underline" (click)="edit(o)">{{ C.edit }}</button>
               <button type="button" class="text-brand-red2 hover:underline" (click)="remove(o)">{{ C.del }}</button>
@@ -152,7 +161,7 @@ export class AdminOffers {
     const inTwoWeeks = new Date(Date.now() + 14 * 864e5); inTwoWeeks.setHours(22, 0, 0, 0);
     this.form.set(o
       ? { ...o, title: { ...o.title }, desc: { ...o.desc }, discount: { ...o.discount }, includes: o.includes.map(x => ({ ...x })), endsLocal: toLocal(o.endsAt) }
-      : { id: null, slug: '', icon: 'gift', title: { ar: '', en: '' }, desc: { ar: '', en: '' }, discount: { ar: '', en: '' }, price: null, oldPrice: null,
+      : { id: null, slug: '', icon: 'gift', title: { ar: '', en: '' }, desc: { ar: '', en: '' }, discount: { ar: '', en: '' }, price: null, oldPrice: null, cost: null,
           endsAt: '', endsLocal: toLocal(inTwoWeeks.toISOString()), service: null, includes: [{ ar: '', en: '' }], img: null, sortOrder: this.items().length, isActive: true });
     scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -164,7 +173,7 @@ export class AdminOffers {
     if (f.price && f.oldPrice && f.oldPrice <= f.price) { this.formErr.set(T.products.badOld); return; }
     const { id, endsLocal, expired, ...rest } = f as OfferForm & { expired?: boolean };
     const body: OfferInput = {
-      ...rest, price: f.price || null, oldPrice: f.oldPrice || null,
+      ...rest, price: f.price || null, oldPrice: f.oldPrice || null, cost: f.cost ?? null,
       endsAt: new Date(endsLocal).toISOString(),   // local time picked in the form → exact moment
       includes: f.includes.filter(x => x.ar.trim() && x.en.trim()),
     };
@@ -183,12 +192,20 @@ export class AdminOffers {
     });
   }
 
-  protected remove(o: Offer) {
-    if (!confirm(this.t().products.confirmDel(this.i.l(o.title)))) return;
+  protected async remove(o: Offer) {
+    if (!(await this.confirm.ask(this.delQ(this.i.l(o.title))))) return;
     this.api.deleteOffer(o.id).subscribe({
       next: () => { this.items.update(l => l.filter(x => x.id !== o.id)); this.flash(this.t().deleted); },
       error: () => this.flash(this.t().failed, true),
     });
+  }
+
+
+  private readonly confirm = inject(ConfirmService);
+  /** "Delete X?" popup texts. */
+  private delQ(subject: string) {
+    const C = this.t().confirm;
+    return { title: C.delTitle, subject, message: C.delMsg, confirmText: C.delBtn, cancelText: C.keep };
   }
 
   private flash(text: string, bad = false) { this.msgBad.set(bad); this.msg.set(text); }

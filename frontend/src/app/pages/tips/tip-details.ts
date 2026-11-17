@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { Seo } from '../../core/seo.service';
 import { RouterLink } from '@angular/router';
 import { I18n } from '../../core/i18n.service';
+import { waLink } from '../../core/site';
 import { TIPS } from '../../data/tips';
 import { PageBanner } from '../../shared/page-banner';
 import { TipCard } from '../../shared/tip-card';
@@ -85,5 +86,5 @@ export class TipDetails {
     return t ? new Date(t.date).toLocaleDateString(this.i.isAr() ? 'ar-EG-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   });
   protected readonly share = computed(() =>
-    `https://wa.me/?text=${encodeURIComponent(`${this.i.l(this.tip()?.title)}\n${location.href}`)}`);
+    waLink(`${this.i.l(this.tip()?.title)}\n${location.href}`, ''));
 }

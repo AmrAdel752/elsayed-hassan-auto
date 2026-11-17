@@ -8,7 +8,9 @@ import { AdminApi, BeforeAfterInput, BeforeAfterPair, GalleryCat, GalleryTile, G
 import { apiError } from './admin-ui';
 import { ICONS } from './admin-products';
 import { ImageInput } from './image-input';
+import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
+import { ConfirmService } from './confirm-dialog';
 
 type Tab = 'tiles' | 'pairs';
 type TileForm = GalleryTileInput & { kind: 'tiles'; id: number | null };
@@ -22,7 +24,7 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
 /** Gallery: photo tiles + before/after pairs. Hidden ones stay here but leave the website. */
 @Component({
   selector: 'app-admin-gallery',
-  imports: [FormsModule, Icon, ImageInput],
+  imports: [FormsModule, Icon, ImageInput, AdminFlash],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let T = t().gallery; @let C = t();
@@ -43,8 +45,7 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
       }
     </div>
 
-    @if (msg()) { <p class="mb-4 rounded-xl border p-3 text-sm font-bold" role="status"
-      [class]="msgBad() ? 'border-brand-red/40 bg-brand-red/10 text-brand-red2' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'">{{ msg() }}</p> }
+    @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
     @if (form(); as f) {
       <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save()" #gf="ngForm">
@@ -223,12 +224,20 @@ export class AdminGallery {
     else this.api.saveBeforeAfter(x.id, { ...this.pairInput(x), isVisible: !x.isVisible }).subscribe({ next: b => this.putPair(b, x.id), error });
   }
 
-  protected remove(x: GalleryTile | BeforeAfterPair) {
-    if (!confirm(this.t().products.confirmDel(this.i.l(x.title)))) return;
+  protected async remove(x: GalleryTile | BeforeAfterPair) {
+    if (!(await this.confirm.ask(this.delQ(this.i.l(x.title))))) return;
     const error = () => this.flash(this.t().failed, true);
     const ok = () => this.flash(this.t().deleted);
     if (this.isTile(x)) this.api.deleteGalleryTile(x.id).subscribe({ next: () => { this.tiles.update(l => l.filter(y => y.id !== x.id)); ok(); }, error });
     else this.api.deleteBeforeAfter(x.id).subscribe({ next: () => { this.pairs.update(l => l.filter(y => y.id !== x.id)); ok(); }, error });
+  }
+
+
+  private readonly confirm = inject(ConfirmService);
+  /** "Delete X?" popup texts. */
+  private delQ(subject: string) {
+    const C = this.t().confirm;
+    return { title: C.delTitle, subject, message: C.delMsg, confirmText: C.delBtn, cancelText: C.keep };
   }
 
   private flash(text: string, bad = false) { this.msgBad.set(bad); this.msg.set(text); }

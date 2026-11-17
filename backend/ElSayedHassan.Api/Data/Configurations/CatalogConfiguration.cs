@@ -32,6 +32,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         b.Property(x => x.Price).HasPrecision(10, 2);
         b.Property(x => x.OldPrice).HasPrecision(10, 2);
+        b.Property(x => x.Cost).HasPrecision(10, 2);
         b.Property(x => x.Models).HasMaxLength(1000);
         b.Property(x => x.BadgeAr).HasMaxLength(60);
         b.Property(x => x.BadgeEn).HasMaxLength(60);
@@ -62,6 +63,7 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
 
         b.Property(x => x.Price).HasPrecision(10, 2);
         b.Property(x => x.OldPrice).HasPrecision(10, 2);
+        b.Property(x => x.Cost).HasPrecision(10, 2);
         b.Property(x => x.Service).HasMaxLength(60);
         b.Property(x => x.ImageUrl).HasMaxLength(300);
         b.HasIndex(x => x.EndsAt);

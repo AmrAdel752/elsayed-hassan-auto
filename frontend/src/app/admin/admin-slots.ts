@@ -4,12 +4,13 @@ import { AuthService } from '../core/auth.service';
 import { I18n } from '../core/i18n.service';
 import { AdminApi, ClosedDay, ClosedSlot, SlotSettings } from './admin-api';
 import { apiError, fmtDay, fmtHour, isoDay } from './admin-ui';
+import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
 
 /** Slot rules (owner) + closing a day or a single hour (owner and staff). */
 @Component({
   selector: 'app-admin-slots',
-  imports: [FormsModule],
+  imports: [FormsModule, AdminFlash],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let T = t().slots;
@@ -22,8 +23,7 @@ import { adminTexts } from './admin.i18n';
       <p class="muted font-bold" role="status">{{ t().loading }}</p>
     } @else {
       @let s = settings()!;
-      @if (msg()) { <p class="mb-4 rounded-xl border p-3 text-sm font-bold" role="status"
-        [class]="msgBad() ? 'border-brand-red/40 bg-brand-red/10 text-brand-red2' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'">{{ msg() }}</p> }
+      @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
       <!-- rules -->
       <form class="card p-5 md:p-6 mb-5" (ngSubmit)="save()">

@@ -5,14 +5,16 @@ import { SITE } from '../core/site';
 import { Icon } from '../shared/icon';
 import { AdminApi, Review, ReviewInput } from './admin-api';
 import { apiError, isoDay } from './admin-ui';
+import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
+import { ConfirmService } from './confirm-dialog';
 
 type ReviewForm = ReviewInput & { id: number | null };
 
 /** Customer reviews: add, edit, hide/show and delete. Hidden reviews stay here but leave the website. */
 @Component({
   selector: 'app-admin-reviews',
-  imports: [FormsModule, Icon],
+  imports: [FormsModule, Icon, AdminFlash],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let T = t().reviews; @let C = t();
@@ -24,8 +26,7 @@ type ReviewForm = ReviewInput & { id: number | null };
       <button type="button" class="btn btn-red !py-2.5" (click)="edit(null)">+ {{ T.add }}</button>
     </div>
 
-    @if (msg()) { <p class="mb-4 rounded-xl border p-3 text-sm font-bold" role="status"
-      [class]="msgBad() ? 'border-brand-red/40 bg-brand-red/10 text-brand-red2' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'">{{ msg() }}</p> }
+    @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
     @if (form(); as f) {
       <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save()" #rf="ngForm">
@@ -179,12 +180,20 @@ export class AdminReviews {
     });
   }
 
-  protected remove(r: Review) {
-    if (!confirm(this.t().products.confirmDel(this.i.l(r.name)))) return;
+  protected async remove(r: Review) {
+    if (!(await this.confirm.ask(this.delQ(this.i.l(r.name))))) return;
     this.api.deleteReview(r.id).subscribe({
       next: () => { this.items.update(l => l.filter(x => x.id !== r.id)); this.flash(this.t().deleted); },
       error: () => this.flash(this.t().failed, true),
     });
+  }
+
+
+  private readonly confirm = inject(ConfirmService);
+  /** "Delete X?" popup texts. */
+  private delQ(subject: string) {
+    const C = this.t().confirm;
+    return { title: C.delTitle, subject, message: C.delMsg, confirmText: C.delBtn, cancelText: C.keep };
   }
 
   private flash(text: string, bad = false) { this.msgBad.set(bad); this.msg.set(text); }

@@ -11,5 +11,14 @@ export const SITE = {
   generations: { Sunny: ['N15', 'N16'], Qashqai: ['J10', 'J11', 'J12'], Juke: ['F15', 'F16'], Tiida: ['C11', 'C12'] } as Record<string, string[]>,
 };
 
-export const waLink = (text?: string) =>
-  `https://wa.me/${SITE.whatsapp}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
+/**
+ * WhatsApp chat link. Uses api.whatsapp.com/send instead of the wa.me short link: wa.me's redirect
+ * breaks emoji (👋 🚗 arrive as "�") on some WhatsApp apps, notably WhatsApp Web / Desktop.
+ * `phone` empty = let the user pick the chat (used for "share").
+ */
+export const waLink = (text?: string, phone: string = SITE.whatsapp) => {
+  const q = new URLSearchParams();
+  if (phone) q.set('phone', phone);
+  if (text) q.set('text', text);
+  return `https://api.whatsapp.com/send?${q.toString().replace(/\+/g, '%20')}`;
+};

@@ -21,11 +21,11 @@ public record AdminCategoryDto(int Id, string Slug, string Icon, TrDto Name, int
 
 public record AdminProductDto(
     int Id, string Slug, int CategoryId, string Cat, string Icon, string Brand, TrDto Name, TrDto Desc, decimal Price,
-    decimal? OldPrice, IReadOnlyList<string> Models, bool InStock, bool Featured, TrDto? Badge, string? Img,
+    decimal? OldPrice, decimal? Cost, IReadOnlyList<string> Models, bool InStock, bool Featured, TrDto? Badge, string? Img,
     int SortOrder, bool IsActive, DateTime CreatedAt, DateTime? UpdatedAt);
 
 public record AdminOfferDto(
-    int Id, string Slug, string Icon, TrDto Title, TrDto Desc, TrDto Discount, decimal? Price, decimal? OldPrice,
+    int Id, string Slug, string Icon, TrDto Title, TrDto Desc, TrDto Discount, decimal? Price, decimal? OldPrice, decimal? Cost,
     DateTimeOffset EndsAt, string? Service, IReadOnlyList<TrDto> Includes, string? Img,
     int SortOrder, bool IsActive, bool Expired, DateTime CreatedAt, DateTime? UpdatedAt);
 
@@ -66,6 +66,8 @@ public record SaveProductDto : IValidatableObject
     [Required] public TrInput Desc { get; init; } = new();
     [Range(0, 10_000_000)] public decimal Price { get; init; }
     [Range(0, 10_000_000)] public decimal? OldPrice { get; init; }
+    /// <summary>Internal cost (optional); only the dashboard sees it.</summary>
+    [Range(0, 10_000_000)] public decimal? Cost { get; init; }
     [Required, MaxLength(30)] public List<string> Models { get; init; } = [];
     public bool InStock { get; init; } = true;
     public bool Featured { get; init; }
@@ -93,6 +95,8 @@ public record SaveOfferDto : IValidatableObject
     [Required] public TrInput Discount { get; init; } = new();
     [Range(0, 10_000_000)] public decimal? Price { get; init; }
     [Range(0, 10_000_000)] public decimal? OldPrice { get; init; }
+    /// <summary>Internal cost (optional); only the dashboard sees it.</summary>
+    [Range(0, 10_000_000)] public decimal? Cost { get; init; }
     [Required] public DateTimeOffset? EndsAt { get; init; }
     [StringLength(60), RegularExpression(CatalogRules.Slug)] public string? Service { get; init; }
     [Required, MaxLength(20)] public List<TrInput> Includes { get; init; } = [];
@@ -128,17 +132,17 @@ public static class CatalogMap
     /// <summary>Needs <c>Category</c> loaded.</summary>
     public static AdminProductDto ToAdminDto(this Product p) => new(
         p.Id, p.Slug, p.CategoryId, p.Category.Slug, p.Icon, p.Brand, TrDto.From(p.Name), TrDto.From(p.Desc), p.Price,
-        p.OldPrice, p.Models, p.InStock, p.Featured, Badge(p), p.ImageUrl, p.SortOrder, p.IsActive, p.CreatedAt, p.UpdatedAt);
+        p.OldPrice, p.Cost, p.Models, p.InStock, p.Featured, Badge(p), p.ImageUrl, p.SortOrder, p.IsActive, p.CreatedAt, p.UpdatedAt);
 
     public static AdminOfferDto ToAdminDto(this Offer o, DateTimeOffset now) => new(
-        o.Id, o.Slug, o.Icon, TrDto.From(o.Title), TrDto.From(o.Desc), TrDto.From(o.Discount), o.Price, o.OldPrice,
+        o.Id, o.Slug, o.Icon, TrDto.From(o.Title), TrDto.From(o.Desc), TrDto.From(o.Discount), o.Price, o.OldPrice, o.Cost,
         o.EndsAt, o.Service, o.Includes.Select(TrDto.From).ToList(), o.ImageUrl, o.SortOrder, o.IsActive,
         o.EndsAt <= now, o.CreatedAt, o.UpdatedAt);
 
     public static void Apply(this SaveProductDto d, Product p)
     {
         p.Slug = d.Slug; p.CategoryId = d.CategoryId; p.Icon = d.Icon.Trim(); p.Brand = d.Brand.Trim();
-        p.Name = d.Name.ToEntity(); p.Desc = d.Desc.ToEntity(); p.Price = d.Price; p.OldPrice = d.OldPrice;
+        p.Name = d.Name.ToEntity(); p.Desc = d.Desc.ToEntity(); p.Price = d.Price; p.OldPrice = d.OldPrice; p.Cost = d.Cost;
         p.Models = d.Models.Select(m => m.Trim()).Distinct().ToList();
         p.InStock = d.InStock; p.Featured = d.Featured;
         p.BadgeAr = d.Badge?.Ar.Trim(); p.BadgeEn = d.Badge?.En.Trim();
@@ -148,7 +152,7 @@ public static class CatalogMap
     public static void Apply(this SaveOfferDto d, Offer o)
     {
         o.Slug = d.Slug; o.Icon = d.Icon.Trim(); o.Title = d.Title.ToEntity(); o.Desc = d.Desc.ToEntity();
-        o.Discount = d.Discount.ToEntity(); o.Price = d.Price; o.OldPrice = d.OldPrice; o.EndsAt = d.EndsAt!.Value;
+        o.Discount = d.Discount.ToEntity(); o.Price = d.Price; o.OldPrice = d.OldPrice; o.Cost = d.Cost; o.EndsAt = d.EndsAt!.Value;
         o.Service = string.IsNullOrWhiteSpace(d.Service) ? null : d.Service;
         o.Includes = d.Includes.Select(t => t.ToEntity()).ToList();
         o.ImageUrl = string.IsNullOrWhiteSpace(d.Img) ? null : d.Img; o.SortOrder = d.SortOrder; o.IsActive = d.IsActive;

@@ -25,13 +25,13 @@ export type CategoryInput = Omit<Category, 'id' | 'productCount'>;
 
 export interface Product {
   id: number; slug: string; categoryId: number; cat: string; icon: string; brand: string; name: Tr; desc: Tr;
-  price: number; oldPrice?: number | null; models: string[]; inStock: boolean; featured: boolean; badge?: Tr | null; img?: string | null;
+  price: number; oldPrice?: number | null; cost?: number | null; models: string[]; inStock: boolean; featured: boolean; badge?: Tr | null; img?: string | null;
   sortOrder: number; isActive: boolean;
 }
 export type ProductInput = Omit<Product, 'id' | 'cat'>;
 
 export interface Offer {
-  id: number; slug: string; icon: string; title: Tr; desc: Tr; discount: Tr; price?: number | null; oldPrice?: number | null;
+  id: number; slug: string; icon: string; title: Tr; desc: Tr; discount: Tr; price?: number | null; oldPrice?: number | null; cost?: number | null;
   endsAt: string; service?: string | null; includes: Tr[]; img?: string | null; sortOrder: number; isActive: boolean; expired: boolean;
 }
 export type OfferInput = Omit<Offer, 'id' | 'expired'>;

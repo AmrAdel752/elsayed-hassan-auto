@@ -76,8 +76,12 @@
   }
   </script>
 
-  <link rel="icon" type="image/jpeg" href="logo.jpg">
-  <link rel="apple-touch-icon" href="logo.jpg">
+  <!-- round badge with transparent corners (cut from logo.jpg). Google search shows a square icon that is a
+       multiple of 48px, so the 48/192px PNGs are listed; favicon.ico is the default crawlers check at /favicon.ico -->
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script>

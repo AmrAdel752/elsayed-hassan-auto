@@ -5,6 +5,7 @@ import { Icon } from '../shared/icon';
 import { AdminApi, Booking, BookingStatus } from './admin-api';
 import { STATUS_CLASS, apiError, fmtDay, fmtHour } from './admin-ui';
 import { adminTexts } from './admin.i18n';
+import { ConfirmService } from './confirm-dialog';
 
 /** One booking: details, call / WhatsApp, status buttons and the internal note. */
 @Component({
@@ -91,8 +92,14 @@ export class BookingCard {
     } as Record<BookingStatus, BookingStatus[]>)[this.booking().status];
   });
 
-  protected setStatus(status: BookingStatus) {
-    if (status === 'Cancelled' && !confirm(this.t().bookings.confirmCancel)) return;
+  private readonly confirm = inject(ConfirmService);
+
+  protected async setStatus(status: BookingStatus) {
+    const C = this.t().confirm, b = this.booking();
+    if (status === 'Cancelled' && !(await this.confirm.ask({
+      title: C.cancelTitle, subject: `${b.code} — ${b.name}`, message: C.cancelMsg,
+      confirmText: C.cancelBtn, cancelText: C.cancelKeep, icon: 'calX',
+    }))) return;
     this.send({ status });
   }
 

@@ -31,10 +31,12 @@ import { adminTexts } from './admin.i18n';
 
         <label class="relative block"><span class="lbl">{{ T.pass }}</span>
           <span class="relative block">
-            <input class="field pe-20" name="password" dir="ltr" autocomplete="current-password" maxlength="200" required
+            <!-- a password is always typed left-to-right (both languages), so the eye sits on the right, opposite the text -->
+            <input class="field !pr-12" name="password" dir="ltr" autocomplete="current-password" maxlength="200" required
                    [type]="show() ? 'text' : 'password'" [ngModel]="password()" (ngModelChange)="password.set($event)">
-            <button type="button" (click)="show.set(!show())" [attr.aria-pressed]="show()"
-                    class="absolute inset-y-0 end-2 my-auto h-9 px-3 rounded-lg text-xs font-bold muted hover:text-brand-red2">{{ show() ? T.hide : T.show }}</button>
+            <button type="button" (click)="show.set(!show())" [attr.aria-pressed]="show()" [attr.aria-label]="show() ? T.hide : T.show" [title]="show() ? T.hide : T.show"
+                    class="absolute inset-y-0 right-2 my-auto w-9 h-9 grid place-items-center rounded-lg muted hover:text-brand-red2 hover:bg-zinc-100 dark:hover:bg-white/5 transition">
+              <app-icon [name]="show() ? 'eyeOff' : 'eye'" class="w-5 h-5" /></button>
           </span>
         </label>
 

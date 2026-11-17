@@ -4,12 +4,13 @@ import { AuthService } from '../core/auth.service';
 import { I18n } from '../core/i18n.service';
 import { Theme } from '../core/theme.service';
 import { Icon } from '../shared/icon';
+import { ConfirmHost } from './confirm-dialog';
 import { adminTexts } from './admin.i18n';
 
 /** Dashboard shell: sidebar (drawer on phones) + top bar + the current admin page. */
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ConfirmHost],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let T = t();
@@ -50,6 +51,7 @@ import { adminTexts } from './admin.i18n';
       </header>
 
       <main id="main" tabindex="-1" class="outline-none p-4 md:p-6 lg:p-8 max-w-6xl mx-auto"><router-outlet /></main>
+      <app-confirm-host />
     </div>
   `,
 })

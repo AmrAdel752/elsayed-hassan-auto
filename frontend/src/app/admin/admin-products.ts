@@ -7,7 +7,9 @@ import { Icon } from '../shared/icon';
 import { AdminApi, Category, CategoryInput, Product, ProductInput } from './admin-api';
 import { apiError, slugify } from './admin-ui';
 import { ImageInput } from './image-input';
+import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
+import { ConfirmService } from './confirm-dialog';
 
 export const ICONS = ['oil', 'parts', 'susp', 'car', 'ac', 'cpu', 'tire', 'wash', 'paint', 'engine', 'shield', 'gift', 'tag'];
 
@@ -17,18 +19,17 @@ type CategoryForm = CategoryInput & { id: number | null };
 /** Products: list + add/edit form (with image), plus the categories manager. */
 @Component({
   selector: 'app-admin-products',
-  imports: [FormsModule, Icon, ImageInput],
+  imports: [FormsModule, Icon, ImageInput, AdminFlash],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @let T = t().products; @let C = t();
+    @let T = t().products; @let C = t(); @let P = T;
     <div class="flex flex-wrap items-center gap-3 mb-5">
       <h1 class="text-2xl md:text-3xl font-black flex-1">{{ T.h }}</h1>
       <button type="button" class="btn !py-2.5 border border-zinc-300 dark:border-ink-600" (click)="showCats.set(!showCats())">{{ T.cats }}</button>
       <button type="button" class="btn btn-red !py-2.5" (click)="edit(null)" [disabled]="!cats().length">+ {{ T.add }}</button>
     </div>
 
-    @if (msg()) { <p class="mb-4 rounded-xl border p-3 text-sm font-bold" role="status"
-      [class]="msgBad() ? 'border-brand-red/40 bg-brand-red/10 text-brand-red2' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'">{{ msg() }}</p> }
+    @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
     <!-- categories manager -->
     @if (showCats()) {
@@ -72,6 +73,8 @@ type CategoryForm = CategoryInput & { id: number | null };
           <label><span class="lbl">{{ T.brand }}</span><input class="field" name="brand" required maxlength="100" [(ngModel)]="f.brand"></label>
           <label><span class="lbl">{{ T.price }}</span><input class="field" type="number" name="price" required min="0" step="0.01" [(ngModel)]="f.price"></label>
           <label><span class="lbl">{{ T.oldPrice }}</span><input class="field" type="number" name="old" min="0" step="0.01" [(ngModel)]="f.oldPrice"></label>
+          <label><span class="lbl">{{ T.cost }}</span><input class="field" type="number" name="cost" min="0" step="0.01" [(ngModel)]="f.cost">
+            <small class="muted text-xs">{{ T.costHint }}</small></label>
           <label><span class="lbl">{{ C.f.slug }}</span><input class="field" name="slug" dir="ltr" required maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" [(ngModel)]="f.slug">
             <small class="muted text-xs">{{ C.f.slugHint }}</small></label>
           <div class="grid grid-cols-2 gap-4">
@@ -150,6 +153,10 @@ type CategoryForm = CategoryInput & { id: number | null };
             <div class="text-end shrink-0">
               <b class="block">{{ i.price(p.price) }}</b>
               @if (p.oldPrice) { <small class="muted line-through">{{ i.price(p.oldPrice) }}</small> }
+              @if (p.cost != null) {
+                <small class="block text-[11px] font-bold muted">{{ P.costIs }} {{ i.price(p.cost) }}
+                  @if (p.price != null) { · <span [class]="p.price - p.cost >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-brand-red2'">{{ P.profit }} {{ i.price(p.price - p.cost) }}</span> }</small>
+              }
             </div>
             <div class="flex flex-col sm:flex-row gap-1 sm:gap-3 shrink-0 text-sm font-bold">
               <button type="button" class="hover:underline" (click)="edit(p)">{{ C.edit }}</button>
@@ -210,7 +217,7 @@ export class AdminProducts {
     this.form.set(p
       ? { ...p, name: { ...p.name }, desc: { ...p.desc }, models: [...p.models], hasBadge: !!p.badge, badgeAr: p.badge?.ar ?? '', badgeEn: p.badge?.en ?? '' }
       : { id: null, slug: '', categoryId: this.catFilter() || this.cats()[0]?.id, icon: 'parts', brand: '', name: { ar: '', en: '' }, desc: { ar: '', en: '' },
-          price: 0, oldPrice: null, models: this.models.slice(), inStock: true, featured: false, img: null, sortOrder: this.items().length, isActive: true,
+          price: 0, oldPrice: null, cost: null, models: this.models.slice(), inStock: true, featured: false, img: null, sortOrder: this.items().length, isActive: true,
           hasBadge: false, badgeAr: '', badgeEn: '' });
     scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -226,7 +233,7 @@ export class AdminProducts {
     const T = this.t();
     if (f.oldPrice && f.oldPrice <= f.price) { this.formErr.set(T.products.badOld); return; }
     const { id, hasBadge, badgeAr, badgeEn, ...rest } = f;
-    const body: ProductInput = { ...rest, oldPrice: f.oldPrice || null, badge: hasBadge ? { ar: badgeAr, en: badgeEn } : null };
+    const body: ProductInput = { ...rest, oldPrice: f.oldPrice || null, cost: f.cost ?? null, badge: hasBadge ? { ar: badgeAr, en: badgeEn } : null };
     this.busy.set(true); this.formErr.set('');
     this.api.saveProduct(id, body).subscribe({
       next: p => {
@@ -243,8 +250,8 @@ export class AdminProducts {
     });
   }
 
-  protected remove(p: Product) {
-    if (!confirm(this.t().products.confirmDel(this.i.l(p.name)))) return;
+  protected async remove(p: Product) {
+    if (!(await this.confirm.ask(this.delQ(this.i.l(p.name))))) return;
     this.api.deleteProduct(p.id).subscribe({
       next: () => { this.items.update(l => l.filter(x => x.id !== p.id)); this.flash(this.t().deleted); this.api.categories().subscribe(c => this.cats.set(c)); },
       error: () => this.flash(this.t().failed, true),
@@ -280,14 +287,22 @@ export class AdminProducts {
     });
   }
 
-  protected removeCat(c: Category) {
+  protected async removeCat(c: Category) {
     const T = this.t();
     if (c.productCount) { this.flash(T.products.catInUse, true); return; }
-    if (!confirm(T.products.confirmDel(this.i.l(c.name)))) return;
+    if (!(await this.confirm.ask(this.delQ(this.i.l(c.name))))) return;
     this.api.deleteCategory(c.id).subscribe({
       next: () => { this.cats.update(l => l.filter(x => x.id !== c.id)); this.flash(T.deleted); },
       error: e => this.flash(apiError(e).code === 'category_in_use' ? T.products.catInUse : T.failed, true),
     });
+  }
+
+
+  private readonly confirm = inject(ConfirmService);
+  /** "Delete X?" popup texts. */
+  private delQ(subject: string) {
+    const C = this.t().confirm;
+    return { title: C.delTitle, subject, message: C.delMsg, confirmText: C.delBtn, cancelText: C.keep };
   }
 
   private flash(text: string, bad = false) { this.msgBad.set(bad); this.msg.set(text); }

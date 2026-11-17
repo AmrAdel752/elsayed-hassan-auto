@@ -80,7 +80,7 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 ## J — Other content (confirm with client first)
 
 - [x] **J1** Reviews: entity + public GET + admin add/approve/delete + frontend from API
-- [ ] **J2** Gallery + before/after: entity + upload + admin page + frontend from API
+- [x] **J2** Gallery + before/after: entity + upload + admin page + frontend from API
 - [ ] **J3** Price estimate jobs + model factors in DB + admin edit + frontend from API
 
 ## K — Deploy

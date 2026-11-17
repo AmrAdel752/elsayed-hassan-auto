@@ -29,6 +29,8 @@ public class Product : BaseEntity
     public decimal Price { get; set; }
     /// <summary>Price before discount (optional, shown struck through).</summary>
     public decimal? OldPrice { get; set; }
+    /// <summary>What the center pays for it. Internal: never sent to the public site.</summary>
+    public decimal? Cost { get; set; }
 
     /// <summary>Nissan models it fits (JSON array), e.g. ["Sunny","Sentra"].</summary>
     public List<string> Models { get; set; } = [];
@@ -60,6 +62,8 @@ public class Offer : BaseEntity
 
     public decimal? Price { get; set; }
     public decimal? OldPrice { get; set; }
+    /// <summary>What the center pays for it. Internal: never sent to the public site.</summary>
+    public decimal? Cost { get; set; }
 
     /// <summary>The offer disappears from the website after this moment.</summary>
     public DateTimeOffset EndsAt { get; set; }

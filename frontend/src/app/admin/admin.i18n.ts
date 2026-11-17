@@ -10,7 +10,7 @@ const AR = {
   role: { Owner: 'صاحب المركز', Staff: 'موظف' },
   nav: { home: 'الرئيسية', bookings: 'الحجوزات', slots: 'المواعيد', products: 'المنتجات', offers: 'العروض', reviews: 'آراء العملاء', gallery: 'المعرض' },
   loading: 'جاري التحميل...', failed: 'حصلت مشكلة — جرّب تاني.', retry: 'إعادة المحاولة',
-  save: 'حفظ', saving: 'جاري الحفظ...', saved: 'اتحفظ ✓', deleted: 'اتمسح ✓', cancel: 'إلغاء', edit: 'تعديل', del: 'مسح',
+  save: 'حفظ', saving: 'جاري الحفظ...', saved: 'اتحفظ', deleted: 'اتمسح', cancel: 'إلغاء', edit: 'تعديل', del: 'مسح',
   hide: 'إخفاء', show: 'إظهار', hidden: 'مخفي', slugTaken: 'الرابط ده مستخدم قبل كده — غيّره.',
   f: {
     nameAr: 'الاسم (عربي)', nameEn: 'الاسم (إنجليزي)', descAr: 'الوصف (عربي)', descEn: 'الوصف (إنجليزي)',
@@ -36,8 +36,7 @@ const AR = {
     action: { New: 'جديد', Confirmed: 'تأكيد', Done: 'تم الانتهاء', Cancelled: 'إلغاء الحجز', NoShow: 'ماجاش' },
     empty: 'مفيش حجوزات هنا.', count: (n: number) => `${n} حجز`, more: 'عرض المزيد',
     car: 'العربية', services: 'الخدمات', notes: 'ملاحظات العميل', wa: 'واتساب',
-    notePh: 'ملاحظة داخلية (مش بتظهر للعميل)', save: 'حفظ',
-    confirmCancel: 'متأكد إنك عايز تلغي الحجز ده؟', slotFull: 'الساعة دي اتملت — مينفعش ترجّع الحجز فيها.',
+    notePh: 'ملاحظة داخلية (مش بتظهر للعميل)', save: 'حفظ', slotFull: 'الساعة دي اتملت — مينفعش ترجّع الحجز فيها.',
   },
   slots: {
     h: 'المواعيد', rules: 'قواعد الحجز', rulesP: 'التغيير بيتطبق على الحجوزات الجديدة بس.', ownerOnly: 'صاحب المركز بس اللي يقدر يغيّر القواعد دي.',
@@ -45,8 +44,13 @@ const AR = {
     badHours: 'أول ميعاد لازم يكون قبل وقت القفل.',
     closedDays: 'أيام مقفولة', closedHours: 'ساعات مقفولة', date: 'اليوم', hour: 'الساعة', reason: 'السبب (اختياري)',
     closeBtn: 'قفل', reopen: 'فتح', noDays: 'مفيش أيام مقفولة.', noHours: 'مفيش ساعات مقفولة.',
-    hasBookings: (n: number) => `اتقفل ✓ — خد بالك: فيه ${n} حجز موجود في الميعاد ده، كلّم أصحابهم.`,
+    hasBookings: (n: number) => `اتقفل — خد بالك: فيه ${n} حجز موجود في الميعاد ده، كلّم أصحابهم.`,
     already: 'الميعاد ده مقفول قبل كده.',
+  },
+  confirm: {
+    delTitle: 'متأكد إنك عايز تمسح ده؟', delMsg: 'المسح نهائي — مش هتقدر ترجّعه تاني.', delBtn: 'أيوه، امسح', keep: 'لا، رجوع',
+    cancelTitle: 'متأكد إنك عايز تلغي الحجز؟', cancelMsg: 'كلّم العميل وعرّفه. تقدر ترجّع الحجز بعدين لو الميعاد لسه فاضي.',
+    cancelBtn: 'أيوه، الغي الحجز', cancelKeep: 'لا، سيبه',
   },
   image: {
     pick: 'اختار صورة', change: 'تغيير الصورة', remove: 'شيل الصورة', uploading: 'جاري الرفع...',
@@ -55,11 +59,11 @@ const AR = {
   products: {
     h: 'المنتجات', cats: 'الأقسام', add: 'إضافة', addH: 'منتج جديد', editH: 'تعديل المنتج',
     cat: 'القسم', brand: 'الماركة', price: 'السعر (ج.م)', oldPrice: 'السعر قبل الخصم (اختياري)',
+    cost: 'سعر التكلفة (اختياري)', costHint: 'ليك إنت بس — مش بيظهر للعملاء في الموقع.', costIs: 'التكلفة', profit: 'المكسب',
     models: 'الموديلات المناسبة', allModels: 'الكل / ولا واحد', inStock: 'متوفر', outStock: 'غير متوفر', featured: 'مميز',
     badge: 'علامة على المنتج', badgeAr: 'العلامة (عربي)', badgeEn: 'العلامة (إنجليزي)',
     search: 'ابحث في المنتجات', allCats: 'كل الأقسام', empty: 'مفيش منتجات.',
-    inCat: (n: number) => `${n} منتج`, badOld: 'السعر قبل الخصم لازم يكون أعلى من السعر.',
-    confirmDel: (name: string) => `متأكد إنك عايز تمسح "${name}"؟`, catInUse: 'القسم ده فيه منتجات — انقلها أو امسحها الأول، أو اخفي القسم.',
+    inCat: (n: number) => `${n} منتج`, badOld: 'السعر قبل الخصم لازم يكون أعلى من السعر.', catInUse: 'القسم ده فيه منتجات — انقلها أو امسحها الأول، أو اخفي القسم.',
   },
   offers: {
     h: 'العروض', add: 'إضافة', addH: 'عرض جديد', editH: 'تعديل العرض',
@@ -93,7 +97,7 @@ const EN: typeof AR = {
   role: { Owner: 'Owner', Staff: 'Staff' },
   nav: { home: 'Home', bookings: 'Bookings', slots: 'Time slots', products: 'Products', offers: 'Offers', reviews: 'Reviews', gallery: 'Gallery' },
   loading: 'Loading...', failed: 'Something went wrong — try again.', retry: 'Retry',
-  save: 'Save', saving: 'Saving...', saved: 'Saved ✓', deleted: 'Deleted ✓', cancel: 'Cancel', edit: 'Edit', del: 'Delete',
+  save: 'Save', saving: 'Saving...', saved: 'Saved', deleted: 'Deleted', cancel: 'Cancel', edit: 'Edit', del: 'Delete',
   hide: 'Hide', show: 'Show', hidden: 'Hidden', slugTaken: 'This link is already used — change it.',
   f: {
     nameAr: 'Name (Arabic)', nameEn: 'Name (English)', descAr: 'Description (Arabic)', descEn: 'Description (English)',
@@ -119,8 +123,7 @@ const EN: typeof AR = {
     action: { New: 'New', Confirmed: 'Confirm', Done: 'Mark done', Cancelled: 'Cancel booking', NoShow: 'No-show' },
     empty: 'No bookings here.', count: (n: number) => `${n} booking${n === 1 ? '' : 's'}`, more: 'Show more',
     car: 'Car', services: 'Services', notes: 'Customer notes', wa: 'WhatsApp',
-    notePh: 'Internal note (never shown to the customer)', save: 'Save',
-    confirmCancel: 'Cancel this booking?', slotFull: "This hour is full now — the booking can't be restored there.",
+    notePh: 'Internal note (never shown to the customer)', save: 'Save', slotFull: "This hour is full now — the booking can't be restored there.",
   },
   slots: {
     h: 'Time slots', rules: 'Booking rules', rulesP: 'Changes apply to new bookings only.', ownerOnly: 'Only the owner can change these rules.',
@@ -128,8 +131,13 @@ const EN: typeof AR = {
     badHours: 'The first slot must be before the closing time.',
     closedDays: 'Closed days', closedHours: 'Closed hours', date: 'Day', hour: 'Hour', reason: 'Reason (optional)',
     closeBtn: 'Close', reopen: 'Reopen', noDays: 'No closed days.', noHours: 'No closed hours.',
-    hasBookings: (n: number) => `Closed ✓ — note: ${n} booking${n === 1 ? '' : 's'} already exist${n === 1 ? 's' : ''} there, please call the customer${n === 1 ? '' : 's'}.`,
+    hasBookings: (n: number) => `Closed — note: ${n} booking${n === 1 ? '' : 's'} already exist${n === 1 ? 's' : ''} there, please call the customer${n === 1 ? '' : 's'}.`,
     already: 'This time is already closed.',
+  },
+  confirm: {
+    delTitle: 'Delete this for good?', delMsg: "This can't be undone.", delBtn: 'Yes, delete', keep: 'No, go back',
+    cancelTitle: 'Cancel this booking?', cancelMsg: 'Let the customer know. You can restore it later if the hour is still free.',
+    cancelBtn: 'Yes, cancel it', cancelKeep: 'No, keep it',
   },
   image: {
     pick: 'Choose image', change: 'Change image', remove: 'Remove image', uploading: 'Uploading...',
@@ -138,11 +146,11 @@ const EN: typeof AR = {
   products: {
     h: 'Products', cats: 'Categories', add: 'Add', addH: 'New product', editH: 'Edit product',
     cat: 'Category', brand: 'Brand', price: 'Price (EGP)', oldPrice: 'Price before discount (optional)',
+    cost: 'Cost price (optional)', costHint: 'For you only — never shown to customers on the website.', costIs: 'Cost', profit: 'Profit',
     models: 'Fits models', allModels: 'All / none', inStock: 'In stock', outStock: 'Out of stock', featured: 'Featured',
     badge: 'Badge on the product', badgeAr: 'Badge (Arabic)', badgeEn: 'Badge (English)',
     search: 'Search products', allCats: 'All categories', empty: 'No products.',
-    inCat: (n: number) => `${n} product${n === 1 ? '' : 's'}`, badOld: 'The price before discount must be higher than the price.',
-    confirmDel: (name: string) => `Delete "${name}"?`, catInUse: 'This category still has products — move or delete them first, or hide the category.',
+    inCat: (n: number) => `${n} product${n === 1 ? '' : 's'}`, badOld: 'The price before discount must be higher than the price.', catInUse: 'This category still has products — move or delete them first, or hide the category.',
   },
   offers: {
     h: 'Offers', add: 'Add', addH: 'New offer', editH: 'Edit offer',

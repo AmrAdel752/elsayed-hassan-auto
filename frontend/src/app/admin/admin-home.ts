@@ -20,7 +20,7 @@ import { adminTexts } from './admin.i18n';
       <p class="card p-6 text-center font-bold text-brand-red2" role="alert">{{ t().failed }}
         <button type="button" class="underline ms-2" (click)="load()">{{ t().retry }}</button></p>
     } @else if (!data()) {
-      <p class="muted font-bold" role="status">{{ t().loading }}</p>
+      <div class="page-loading" role="status"><span class="spinner"></span>{{ t().loading }}</div>
     } @else {
       @let d = data()!;
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

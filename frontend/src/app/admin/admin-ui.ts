@@ -38,3 +38,28 @@ export function apiError(e: unknown): { status: number; code: string; message: s
     message: first ? `${first[0]}: ${first[1][0]}` : body?.detail ?? '',
   };
 }
+
+/**
+ * Move item `id` one place up (-1) or down (+1) next to its neighbour in `visible` (the list as shown, maybe
+ * filtered), then number the whole list 0..n-1. Returns only the items whose order changed (copies with the
+ * new sortOrder) — save those. [] = it can't move that way.
+ */
+export function moveItem<T extends { id: number; sortOrder: number }>(all: T[], visible: T[], id: number, dir: -1 | 1): T[] {
+  const vi = visible.findIndex(x => x.id === id), other = visible[vi + dir];
+  if (vi < 0 || !other) return [];
+  const list = bySortOrder(all);
+  const from = list.findIndex(x => x.id === id), to = list.findIndex(x => x.id === other.id);
+  const [it] = list.splice(from, 1);
+  list.splice(to, 0, it);
+  return list.flatMap((x, i) => (x.sortOrder === i ? [] : [{ ...x, sortOrder: i }]));
+}
+
+/** Copy of the list in display order (sortOrder, then oldest first). */
+export const bySortOrder = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id);
+
+/** Put the changed copies back into the list, in display order. */
+export const withChanges = <T extends { sortOrder: number; id: number }>(l: T[], changed: T[]) =>
+  bySortOrder(l.map(x => changed.find(c => c.id === x.id) ?? x));
+
+/** Order for a new item: after the last one. */
+export const nextSortOrder = (l: { sortOrder: number }[]) => (l.length ? Math.max(...l.map(x => x.sortOrder)) + 1 : 0);

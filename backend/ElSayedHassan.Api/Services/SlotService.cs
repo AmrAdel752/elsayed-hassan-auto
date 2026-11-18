@@ -10,6 +10,9 @@ public enum SlotBlock { None, Past, TooFar, OutsideHours, DayClosed, HourClosed 
 
 public class SlotService(AppDbContext db, CairoClock clock)
 {
+    /// <summary>Weekly day off: the center is closed every Sunday (also shown on the website).</summary>
+    public static bool IsWeeklyOff(DateOnly date) => date.DayOfWeek == DayOfWeek.Sunday;
+
     public Task<SlotSettings> GetSettingsAsync(CancellationToken ct) =>
         db.SlotSettings.AsNoTracking().OrderBy(s => s.Id).FirstAsync(ct);
 
@@ -45,7 +48,7 @@ public class SlotService(AppDbContext db, CairoClock clock)
     {
         var block = CheckTime(s, date, hour);
         if (block != SlotBlock.None) return block;
-        if (await db.ClosedDays.AnyAsync(d => d.Date == date, ct)) return SlotBlock.DayClosed;
+        if (IsWeeklyOff(date) || await db.ClosedDays.AnyAsync(d => d.Date == date, ct)) return SlotBlock.DayClosed;
         if (await db.ClosedSlots.AnyAsync(c => c.Date == date && c.Hour == hour, ct)) return SlotBlock.HourClosed;
         return SlotBlock.None;
     }
@@ -73,7 +76,7 @@ public class SlotService(AppDbContext db, CairoClock clock)
         var result = new List<SlotDayDto>(days);
         for (var date = from; date < to; date = date.AddDays(1))
         {
-            var dayClosed = closedDays.Contains(date);
+            var dayClosed = IsWeeklyOff(date) || closedDays.Contains(date);
             var hours = new List<SlotHourDto>(s.CloseHour - s.OpenHour);
             for (var h = s.OpenHour; h < s.CloseHour; h++)
             {

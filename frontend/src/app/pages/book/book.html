@@ -173,6 +173,9 @@
         @if (err()) {
           <p class="mt-6 rounded-2xl border border-brand-red/40 bg-brand-red/10 text-brand-red2 p-4 text-sm font-bold flex items-start gap-2" role="alert">
             <app-icon name="clock" class="w-5 h-5 shrink-0" />{{ i.t('book.err.' + err()) }}</p>
+          @if (err() === 'down') {
+            <a [href]="waUrl()" target="_blank" class="btn bg-[#25d366] text-white mt-3"><app-icon name="wa" class="w-5 h-5" />{{ i.t('load.wa') }}</a>
+          }
         }
 
         <!-- nav -->
@@ -186,7 +189,7 @@
             <button type="button" (click)="go(step() + 1)" [disabled]="!canNext()" class="btn btn-red flex-1 sm:flex-none justify-center !py-3 md:!py-3.5 disabled:opacity-40 disabled:pointer-events-none">
               {{ i.t('book.next') }}<app-icon name="arrow" class="w-5 h-5 rtl:rotate-180" /></button>
           } @else {
-            <button type="button" (click)="confirm()" [disabled]="sending()" class="btn disabled:opacity-60 disabled:pointer-events-none bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,.7)] flex-1 sm:flex-none justify-center !py-3 md:!py-3.5"><app-icon name="wa" class="w-5 h-5" />{{ sending() ? i.t('book.sending') : i.t('book.confirm') }}</button>
+            <button type="button" (click)="confirm()" [attr.aria-busy]="sending()" [disabled]="sending()" class="btn disabled:opacity-60 disabled:pointer-events-none bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,.7)] flex-1 sm:flex-none justify-center !py-3 md:!py-3.5"><app-icon name="wa" class="w-5 h-5" />{{ sending() ? i.t('book.sending') : i.t('book.confirm') }}</button>
           }
         </div>
       </div>

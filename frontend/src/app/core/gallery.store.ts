@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { BeforeAfter, GalleryItem } from '../data/gallery';
 import { SNAPSHOT } from '../data/snapshot';
 import { Live, strip } from './live';
+import { ContentSync } from './content-sync';
 
 type GalleryResponse = { items: GalleryItem[]; beforeAfter: BeforeAfter[] };
 
@@ -19,6 +20,9 @@ export class GalleryStore {
   readonly items = computed(() => this.live.data().items);
   readonly beforeAfter = computed(() => this.live.data().beforeAfter);
 
-  /** Called when the page opens: check the server for anything newer (at most once a minute). */
-  refresh() { this.live.refresh(); }
+  /** Called when the page opens: check the server for anything newer (at most once a minute; now if `force`d). */
+  refresh(force = false) { this.live.refresh(force); }
+
+  // dashboard changes show up on open pages without a refresh
+  private readonly sync = inject(ContentSync).changes.subscribe(() => this.refresh(true));
 }

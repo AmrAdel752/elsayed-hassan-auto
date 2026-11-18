@@ -8,13 +8,20 @@ import { I18n } from '../core/i18n.service';
 const AR = {
   title: 'لوحة التحكم', brand: 'السيد حسن أوتو', menu: 'القائمة', close: 'إغلاق', site: 'عرض الموقع', logout: 'خروج',
   role: { Owner: 'صاحب المركز', Staff: 'موظف' },
-  nav: { home: 'الرئيسية', bookings: 'الحجوزات', slots: 'المواعيد', products: 'المنتجات', offers: 'العروض', reviews: 'آراء العملاء', gallery: 'المعرض' },
+  nav: { home: 'الرئيسية', bookings: 'الحجوزات', slots: 'المواعيد', products: 'المنتجات', categories: 'الأقسام', offers: 'العروض', reviews: 'آراء العملاء', gallery: 'المعرض' },
   loading: 'جاري التحميل...', failed: 'حصلت مشكلة — جرّب تاني.', retry: 'إعادة المحاولة',
   save: 'حفظ', saving: 'جاري الحفظ...', saved: 'اتحفظ', deleted: 'اتمسح', cancel: 'إلغاء', edit: 'تعديل', del: 'مسح',
+  fillAll: 'فيه خانات لازم تتملا — اتعلّم عليها بالأحمر.',
+  move: { up: 'طلّعه لفوق (يظهر قبل)', down: 'نزّله لتحت (يظهر بعد)', hint: 'استخدم الأسهم ▲▼ عشان تغيّر ترتيب الظهور في الموقع.' },
+  alerts: {
+    title: 'حجز جديد', open: 'افتح الحجوزات', badge: (n: number) => `${n} حجز جديد مستني التأكيد`,
+    ask: 'عايز تنبيه على الموبايل/الكمبيوتر أول ما ييجي حجز جديد؟ (لوحة التحكم لازم تكون مفتوحة)', allow: 'فعّل التنبيهات',
+  },
   hide: 'إخفاء', show: 'إظهار', hidden: 'مخفي', slugTaken: 'الرابط ده مستخدم قبل كده — غيّره.',
   f: {
     nameAr: 'الاسم (عربي)', nameEn: 'الاسم (إنجليزي)', descAr: 'الوصف (عربي)', descEn: 'الوصف (إنجليزي)',
     slug: 'الرابط (slug)', slugHint: 'حروف إنجليزي صغيرة وأرقام وشرطة (-) بس.', icon: 'الأيقونة', sort: 'الترتيب',
+    sortHint: 'الرقم الأصغر بيظهر الأول في الموقع.',
     image: 'الصورة', active: 'ظاهر في الموقع', ar: 'عربي',
   },
   login: {
@@ -58,7 +65,7 @@ const AR = {
   },
   products: {
     h: 'المنتجات', cats: 'الأقسام', add: 'إضافة', addH: 'منتج جديد', editH: 'تعديل المنتج',
-    cat: 'القسم', brand: 'الماركة', price: 'السعر بالجنيه (اختياري)', oldPrice: 'السعر قبل الخصم (اختياري)',
+    cat: 'القسم', brand: 'الماركة', brandPick: 'اختار الماركة', brandOther: '+ ماركة تانية مش في القايمة', brandNew: 'اكتب اسم الماركة الجديدة', brandBack: 'رجوع للقايمة', price: 'السعر بالجنيه (اختياري)', oldPrice: 'السعر قبل الخصم (اختياري)',
     priceHint: 'لو سبته فاضي، الموقع هيكتب "اسأل عن السعر".',
     nameEn: 'الاسم بالإنجليزي (اختياري)', descEn: 'الوصف بالإنجليزي (اختياري)',
     enHint: 'لو سبتها فاضية، زوار النسخة الإنجليزي هيشوفوا النص العربي.',
@@ -77,9 +84,18 @@ const AR = {
     search: 'ابحث في المنتجات', allCats: 'كل الأقسام', empty: 'مفيش منتجات.',
     inCat: (n: number) => `${n} منتج`, badOld: 'السعر قبل الخصم لازم يكون أعلى من السعر.', catInUse: 'القسم ده فيه منتجات — انقلها أو امسحها الأول، أو اخفي القسم.',
   },
+  cats: {
+    h: 'أقسام المنتجات', intro: 'الأقسام اللي الزبون بيفلتر بيها المنتجات في الموقع (زيوت، فلاتر، فرامل...).',
+    add: 'إضافة قسم', addH: 'قسم جديد', editH: 'تعديل القسم',
+    nameAr: 'اسم القسم (عربي)', nameEn: 'اسم القسم بالإنجليزي (اختياري)', namePh: 'مثلاً: زيوت',
+    active: 'يظهر في الموقع', activeHint: 'لو شلت العلامة، القسم ومنتجاته يختفوا من الموقع ويفضلوا هنا.',
+    empty: 'مفيش أقسام لسه.', taken: 'فيه قسم بنفس الاسم ده — غيّر الاسم الإنجليزي.',
+  },
   offers: {
     h: 'العروض', add: 'إضافة', addH: 'عرض جديد', editH: 'تعديل العرض',
-    titleAr: 'العنوان (عربي)', titleEn: 'العنوان (إنجليزي)', discountAr: 'نص الخصم (عربي)', discountEn: 'نص الخصم (إنجليزي)', discountPh: 'وفّر 18%',
+    titleAr: 'العنوان (عربي)', titleEn: 'العنوان بالإنجليزي (اختياري)', discountAr: 'نص الخصم (عربي)', discountEn: 'نص الخصم بالإنجليزي (اختياري)', discountPh: 'وفّر 18%',
+    descAr: 'الوصف (عربي)', descEn: 'الوصف بالإنجليزي (اختياري)', enHint: 'أي خانة إنجليزي تسيبها فاضية، زوار النسخة الإنجليزي هيشوفوا النص العربي.',
+    includesHint: 'اكتب كل بند بالعربي — الإنجليزي اختياري. البنود الفاضية مش بتتحفظ.', active: 'يظهر في الموقع', activeHint: 'لو شلت العلامة، العرض يختفي من الموقع ويفضل هنا — من غير ما تمسحه.',
     price: 'السعر (اختياري)', oldPrice: 'السعر قبل الخصم (اختياري)', endsAt: 'ينتهي في', service: 'الخدمة عند الحجز', noService: 'من غير خدمة محددة',
     includes: 'العرض بيشمل', addInclude: 'إضافة بند', until: 'لحد', expired: 'منتهي', live: 'شغال', empty: 'مفيش عروض.',
   },
@@ -107,13 +123,20 @@ const AR = {
 const EN: typeof AR = {
   title: 'Dashboard', brand: 'El Sayed Hassan Auto', menu: 'Menu', close: 'Close', site: 'View website', logout: 'Sign out',
   role: { Owner: 'Owner', Staff: 'Staff' },
-  nav: { home: 'Home', bookings: 'Bookings', slots: 'Time slots', products: 'Products', offers: 'Offers', reviews: 'Reviews', gallery: 'Gallery' },
+  nav: { home: 'Home', bookings: 'Bookings', slots: 'Time slots', products: 'Products', categories: 'Categories', offers: 'Offers', reviews: 'Reviews', gallery: 'Gallery' },
   loading: 'Loading...', failed: 'Something went wrong — try again.', retry: 'Retry',
   save: 'Save', saving: 'Saving...', saved: 'Saved', deleted: 'Deleted', cancel: 'Cancel', edit: 'Edit', del: 'Delete',
+  fillAll: 'Some required boxes are empty — they are marked in red.',
+  move: { up: 'Move up (shows earlier)', down: 'Move down (shows later)', hint: 'Use the ▲▼ arrows to change the order on the website.' },
+  alerts: {
+    title: 'New booking', open: 'Open bookings', badge: (n: number) => `${n} new booking${n === 1 ? '' : 's'} waiting for confirmation`,
+    ask: 'Get a phone/computer alert the moment a new booking arrives? (the dashboard must be open)', allow: 'Turn on alerts',
+  },
   hide: 'Hide', show: 'Show', hidden: 'Hidden', slugTaken: 'This link is already used — change it.',
   f: {
     nameAr: 'Name (Arabic)', nameEn: 'Name (English)', descAr: 'Description (Arabic)', descEn: 'Description (English)',
     slug: 'Link (slug)', slugHint: 'Lower-case letters, digits and dashes (-) only.', icon: 'Icon', sort: 'Order',
+    sortHint: 'Smaller numbers show first on the website.',
     image: 'Image', active: 'Visible on the website', ar: 'Arabic',
   },
   login: {
@@ -157,7 +180,7 @@ const EN: typeof AR = {
   },
   products: {
     h: 'Products', cats: 'Categories', add: 'Add', addH: 'New product', editH: 'Edit product',
-    cat: 'Category', brand: 'Brand', price: 'Price in EGP (optional)', oldPrice: 'Price before discount (optional)',
+    cat: 'Category', brand: 'Brand', brandPick: 'Choose the brand', brandOther: '+ Another brand (not in the list)', brandNew: 'Type the new brand name', brandBack: 'Back to the list', price: 'Price in EGP (optional)', oldPrice: 'Price before discount (optional)',
     priceHint: 'If left empty, the website shows "Ask for the price".',
     nameEn: 'Name in English (optional)', descEn: 'Description in English (optional)',
     enHint: 'If left empty, English visitors see the Arabic text.',
@@ -176,9 +199,18 @@ const EN: typeof AR = {
     search: 'Search products', allCats: 'All categories', empty: 'No products.',
     inCat: (n: number) => `${n} product${n === 1 ? '' : 's'}`, badOld: 'The price before discount must be higher than the price.', catInUse: 'This category still has products — move or delete them first, or hide the category.',
   },
+  cats: {
+    h: 'Product categories', intro: 'The groups customers use to filter products on the website (oils, filters, brakes...).',
+    add: 'Add category', addH: 'New category', editH: 'Edit category',
+    nameAr: 'Category name (Arabic)', nameEn: 'Category name in English (optional)', namePh: 'e.g. زيوت',
+    active: 'Show on the website', activeHint: 'Untick to hide the category and its products from the website, keeping them here.',
+    empty: 'No categories yet.', taken: 'A category with this name exists — change the English name.',
+  },
   offers: {
     h: 'Offers', add: 'Add', addH: 'New offer', editH: 'Edit offer',
-    titleAr: 'Title (Arabic)', titleEn: 'Title (English)', discountAr: 'Discount text (Arabic)', discountEn: 'Discount text (English)', discountPh: 'وفّر 18%',
+    titleAr: 'Title (Arabic)', titleEn: 'Title in English (optional)', discountAr: 'Discount text (Arabic)', discountEn: 'Discount text in English (optional)', discountPh: 'وفّر 18%',
+    descAr: 'Description (Arabic)', descEn: 'Description in English (optional)', enHint: 'Any English box left empty shows the Arabic text to English visitors.',
+    includesHint: 'Write each item in Arabic — English is optional. Empty items are not saved.', active: 'Show on the website', activeHint: 'Untick to hide the offer from the website and keep it here — without deleting it.',
     price: 'Price (optional)', oldPrice: 'Price before discount (optional)', endsAt: 'Ends at', service: 'Service when booking', noService: 'No specific service',
     includes: 'The offer includes', addInclude: 'Add item', until: 'until', expired: 'Ended', live: 'Live', empty: 'No offers.',
   },

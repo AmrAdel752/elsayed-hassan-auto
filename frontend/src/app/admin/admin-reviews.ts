@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { I18n } from '../core/i18n.service';
 import { SITE } from '../core/site';
 import { Icon } from '../shared/icon';
@@ -29,7 +29,7 @@ type ReviewForm = ReviewInput & { id: number | null };
     @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
     @if (form(); as f) {
-      <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save()" #rf="ngForm">
+      <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save(rf)" #rf="ngForm">
         <h2 class="text-lg font-black mb-4">{{ f.id ? T.editH : T.addH }}</h2>
         <div class="grid sm:grid-cols-2 gap-4">
           <label><span class="lbl">{{ T.nameAr }}</span><input class="field" name="nar" required minlength="2" maxlength="100" [(ngModel)]="f.nameAr"></label>
@@ -64,7 +64,7 @@ type ReviewForm = ReviewInput & { id: number | null };
 
         @if (formErr()) { <p class="mt-4 text-sm font-bold text-brand-red2" role="alert">{{ formErr() }}</p> }
         <div class="mt-5 flex gap-3">
-          <button type="submit" [disabled]="busy() || rf.invalid" class="btn btn-red disabled:opacity-50 disabled:pointer-events-none">{{ busy() ? C.saving : C.save }}</button>
+          <button type="submit" [attr.aria-busy]="busy()" [disabled]="busy()" class="btn btn-red disabled:opacity-50 disabled:pointer-events-none">{{ busy() ? C.saving : C.save }}</button>
           <button type="button" class="btn border border-zinc-300 dark:border-ink-600" (click)="form.set(null)">{{ C.cancel }}</button>
         </div>
       </form>
@@ -73,7 +73,7 @@ type ReviewForm = ReviewInput & { id: number | null };
     @if (failed()) {
       <p class="card p-6 text-center font-bold text-brand-red2" role="alert">{{ C.failed }} <button type="button" class="underline ms-2" (click)="load()">{{ C.retry }}</button></p>
     } @else if (loading()) {
-      <p class="muted font-bold" role="status">{{ C.loading }}</p>
+      <div class="page-loading" role="status"><span class="spinner"></span>{{ C.loading }}</div>
     } @else {
       <div class="space-y-2.5">
         @for (r of items(); track r.id) {
@@ -158,9 +158,10 @@ export class AdminReviews {
     scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected save() {
+  protected save(ngf: NgForm) {
     const f = this.form();
     if (!f) return;
+    if (ngf.invalid) { ngf.form.markAllAsTouched(); this.formErr.set(this.t().fillAll); return; }
     const { id, ...body } = f;
     this.busy.set(true); this.formErr.set('');
     this.api.saveReview(id, { ...body, year: body.year || null }).subscribe({

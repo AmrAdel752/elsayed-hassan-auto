@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Observable, forkJoin } from 'rxjs';
 import { I18n } from '../core/i18n.service';
 import { imgUrl } from '../core/media';
 import { Icon } from '../shared/icon';
 import { AdminApi, BeforeAfterInput, BeforeAfterPair, GalleryCat, GalleryTile, GalleryTileInput } from './admin-api';
-import { apiError } from './admin-ui';
-import { ICONS } from './admin-products';
+import { apiError, moveItem, withChanges } from './admin-ui';
+import { MoveArrows } from './move-arrows';
+import { autoIcon } from './auto-icon';
 import { ImageInput } from './image-input';
 import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
@@ -24,7 +25,7 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
 /** Gallery: photo tiles + before/after pairs. Hidden ones stay here but leave the website. */
 @Component({
   selector: 'app-admin-gallery',
-  imports: [FormsModule, Icon, ImageInput, AdminFlash],
+  imports: [FormsModule, Icon, ImageInput, AdminFlash, MoveArrows],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let T = t().gallery; @let C = t();
@@ -48,7 +49,7 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
     @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
 
     @if (form(); as f) {
-      <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save()" #gf="ngForm">
+      <form class="card p-5 md:p-6 mb-5 border-brand-red/40" (ngSubmit)="save(gf)" #gf="ngForm">
         <h2 class="text-lg font-black mb-4">{{ f.kind === 'tiles' ? (f.id ? T.editTileH : T.addTileH) : (f.id ? T.editPairH : T.addPairH) }}</h2>
         <div class="grid sm:grid-cols-2 gap-4">
           <label><span class="lbl">{{ T.titleAr }}</span><input class="field" name="tar" required minlength="2" maxlength="200" [(ngModel)]="f.titleAr"></label>
@@ -66,18 +67,12 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
             <label class="flex items-center gap-2 font-bold text-sm self-end pb-3"><input type="checkbox" name="tall" class="w-5 h-5 accent-[#dc2f36]" [(ngModel)]="f.tall">{{ T.tall }}</label>
             <div class="sm:col-span-2"><span class="lbl">{{ C.f.image }}</span><app-image-input [(value)]="f.img" /></div>
           }
-
-          <div class="grid grid-cols-2 gap-4">
-            <label><span class="lbl">{{ C.f.icon }}</span><select class="field" name="icon" [(ngModel)]="f.icon">@for (x of icons; track x) { <option>{{ x }}</option> }</select>
-              <small class="muted text-xs">{{ T.iconHint }}</small></label>
-            <label><span class="lbl">{{ C.f.sort }}</span><input class="field" type="number" name="sort" required min="0" max="10000" [(ngModel)]="f.sortOrder"></label>
-          </div>
           <label class="flex items-center gap-2 font-bold text-sm self-end pb-3"><input type="checkbox" name="visible" class="w-5 h-5 accent-[#dc2f36]" [(ngModel)]="f.isVisible">{{ C.f.active }}</label>
         </div>
 
         @if (formErr()) { <p class="mt-4 text-sm font-bold text-brand-red2" role="alert">{{ formErr() }}</p> }
         <div class="mt-5 flex gap-3">
-          <button type="submit" [disabled]="busy() || gf.invalid" class="btn btn-red disabled:opacity-50 disabled:pointer-events-none">{{ busy() ? C.saving : C.save }}</button>
+          <button type="submit" [attr.aria-busy]="busy()" [disabled]="busy()" class="btn btn-red disabled:opacity-50 disabled:pointer-events-none">{{ busy() ? C.saving : C.save }}</button>
           <button type="button" class="btn border border-zinc-300 dark:border-ink-600" (click)="form.set(null)">{{ C.cancel }}</button>
         </div>
       </form>
@@ -86,10 +81,10 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
     @if (failed()) {
       <p class="card p-6 text-center font-bold text-brand-red2" role="alert">{{ C.failed }} <button type="button" class="underline ms-2" (click)="load()">{{ C.retry }}</button></p>
     } @else if (loading()) {
-      <p class="muted font-bold" role="status">{{ C.loading }}</p>
+      <div class="page-loading" role="status"><span class="spinner"></span>{{ C.loading }}</div>
     } @else if (tab() === 'tiles') {
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        @for (g of tiles(); track g.id) {
+        @for (g of tiles(); track g.id; let first = $first, last = $last) {
           <article class="card overflow-hidden flex flex-col" [class.opacity-60]="!g.isVisible">
             <div class="aspect-[4/3] bg-zinc-100 dark:bg-ink-900 grid place-items-center relative">
               @if (g.img) { <img [src]="src(g.img)" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover"> }
@@ -98,11 +93,12 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
             </div>
             <div class="p-3 flex-1 flex flex-col">
               <b class="block leading-snug">{{ i.l(g.title) }}</b>
-              <small class="muted">{{ T.cats[g.cat] }} · #{{ g.sortOrder }}</small>
+              <small class="muted">{{ T.cats[g.cat] }}</small>
               <div class="mt-auto pt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-bold">
                 <button type="button" class="hover:underline" (click)="toggle(g)">{{ g.isVisible ? C.hide : C.show }}</button>
                 <button type="button" class="hover:underline" (click)="edit(g)">{{ C.edit }}</button>
                 <button type="button" class="text-brand-red2 hover:underline" (click)="remove(g)">{{ C.del }}</button>
+                <app-move-arrows class="!flex-row ms-auto !my-0" [first]="first" [last]="last" [busy]="moving()" (move)="moveTile(g, $event)" />
               </div>
             </div>
           </article>
@@ -110,8 +106,9 @@ const bySort = <T extends { sortOrder: number; id: number }>(l: T[]) => [...l].s
       </div>
     } @else {
       <div class="space-y-2.5">
-        @for (b of pairs(); track b.id) {
+        @for (b of pairs(); track b.id; let first = $first, last = $last) {
           <article class="card p-3 md:p-4 flex flex-wrap items-center gap-3 md:gap-4" [class.opacity-60]="!b.isVisible">
+            <app-move-arrows [first]="first" [last]="last" [busy]="moving()" (move)="movePair(b, $event)" />
             <div class="flex gap-1.5 shrink-0">
               @for (p of [b.before, b.after]; track $index) {
                 <div class="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-ink-900 grid place-items-center overflow-hidden">
@@ -142,7 +139,6 @@ export class AdminGallery {
   private readonly api = inject(AdminApi);
   protected readonly i = inject(I18n);
   protected readonly t = adminTexts();
-  protected readonly icons = ICONS;
   protected readonly cats = CATS;
   protected readonly tabs: Tab[] = ['tiles', 'pairs'];
   protected readonly src = imgUrl;
@@ -200,9 +196,13 @@ export class AdminGallery {
     scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  protected save() {
+  protected save(ngf: NgForm) {
     const f = this.form();
     if (!f) return;
+    if (ngf.invalid) { ngf.form.markAllAsTouched(); this.formErr.set(this.t().fillAll); return; }
+    // the icon (shown while there's no photo) is picked from the title
+    const fallback = f.kind === 'pairs' ? 'car' : f.cat === 'cars' ? 'car' : f.cat === 'workshop' ? 'engine' : 'parts';
+    f.icon = autoIcon(`${f.titleAr} ${f.titleEn}`, fallback);
     this.busy.set(true); this.formErr.set('');
     const done = () => { this.busy.set(false); this.form.set(null); this.flash(this.t().saved); };
     const fail = (e: unknown) => { this.busy.set(false); this.formErr.set(apiError(e).message || this.t().failed); };
@@ -232,6 +232,28 @@ export class AdminGallery {
     else this.api.deleteBeforeAfter(x.id).subscribe({ next: () => { this.pairs.update(l => l.filter(y => y.id !== x.id)); ok(); }, error });
   }
 
+
+  // ---------- order (▲▼) ----------
+  protected readonly moving = signal(false);
+  protected moveTile(g: GalleryTile, dir: -1 | 1) {
+    const changed = moveItem(this.tiles(), this.tiles(), g.id, dir);
+    if (!changed.length) return;
+    this.tiles.update(l => withChanges(l, changed));
+    this.saveOrder(changed.map(c => this.api.saveGalleryTile(c.id, this.tileInput(c))));
+  }
+  protected movePair(b: BeforeAfterPair, dir: -1 | 1) {
+    const changed = moveItem(this.pairs(), this.pairs(), b.id, dir);
+    if (!changed.length) return;
+    this.pairs.update(l => withChanges(l, changed));
+    this.saveOrder(changed.map(c => this.api.saveBeforeAfter(c.id, this.pairInput(c))));
+  }
+  private saveOrder(calls: Observable<unknown>[]) {
+    this.moving.set(true);
+    forkJoin(calls).subscribe({
+      next: () => this.moving.set(false),
+      error: () => { this.moving.set(false); this.flash(this.t().failed, true); this.load(); },
+    });
+  }
 
   private readonly confirm = inject(ConfirmService);
   /** "Delete X?" popup texts. */

@@ -25,7 +25,7 @@ const SIDE = 1920;
         @else { <app-icon name="parts" class="w-8 h-8 muted" /> }
       </div>
       <div class="min-w-0">
-        <label class="btn !px-4 !py-2 !text-sm border border-zinc-300 dark:border-ink-600 hover:!translate-y-0" [class.opacity-50]="busy()">
+        <label class="btn !px-4 !py-2 !text-sm border border-zinc-300 dark:border-ink-600 hover:!translate-y-0" [class.opacity-50]="busy()" [attr.aria-busy]="busy()">
           {{ busy() ? T.uploading : value() ? T.change : T.pick }}
           <input type="file" class="sr-only" accept="image/*" [disabled]="busy()" (change)="pick($event)">
         </label>

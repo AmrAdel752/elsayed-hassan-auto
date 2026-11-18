@@ -40,7 +40,7 @@ import { adminTexts } from './admin.i18n';
           </span>
         </label>
 
-        <button type="submit" [disabled]="sending() || !userName().trim() || !password()"
+        <button type="submit" [attr.aria-busy]="sending()" [disabled]="sending() || !userName().trim() || !password()"
                 class="btn btn-red relative w-full justify-center !py-3.5 disabled:opacity-50 disabled:pointer-events-none">
           {{ sending() ? T.sending : T.submit }}</button>
 

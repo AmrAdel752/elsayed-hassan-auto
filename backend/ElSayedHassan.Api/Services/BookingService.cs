@@ -12,7 +12,7 @@ public enum BookingError { None, Invalid, SlotFull, DuplicateInSlot, TooManyUpco
 
 public record BookingResult(BookingError Error, BookingCreatedDto? Booking = null, Dictionary<string, string[]>? Errors = null);
 
-public partial class BookingService(AppDbContext db, SlotService slots, CairoClock clock, ILogger<BookingService> log)
+public partial class BookingService(AppDbContext db, SlotService slots, CairoClock clock, BookingNotifier notifier, ILogger<BookingService> log)
 {
     /// <summary>Spam guard: max active upcoming bookings per phone.</summary>
     public const int MaxUpcomingPerPhone = 3;
@@ -84,6 +84,7 @@ public partial class BookingService(AppDbContext db, SlotService slots, CairoClo
         await tx.CommitAsync(ct);
 
         log.LogInformation("Booking {Code} created for {Date} {Hour}:00", booking.Code, booking.Date, booking.Hour);
+        notifier.NewBooking(booking);   // email the owner (if configured), in the background
         return new BookingResult(BookingError.None, new BookingCreatedDto(booking.Code, booking.Date, booking.Hour));
     }
 

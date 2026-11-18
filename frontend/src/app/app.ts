@@ -7,14 +7,16 @@ import { Header } from './layout/header';
 import { Footer } from './layout/footer';
 import { Preloader } from './layout/preloader';
 import { BottomNav } from './layout/bottom-nav';
+import { NavProgress } from './layout/nav-progress';
 
 const isAdminUrl = (url: string) => /^\/admin(\/|\?|#|$)/.test(url);
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer, Preloader, BottomNav],
+  imports: [RouterOutlet, Header, Footer, Preloader, BottomNav, NavProgress],
   template: `
     <app-preloader aria-hidden="true" />
+    <app-nav-progress />
     @if (admin()) {
       <!-- the dashboard has its own shell (admin/admin-layout.ts) -->
       <router-outlet />

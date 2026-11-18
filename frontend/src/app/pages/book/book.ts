@@ -59,7 +59,7 @@ export class Book implements OnInit {
   protected readonly slots = signal<Map<string, number> | null | undefined>(undefined);
   protected readonly sending = signal(false);
   /** Error shown above the nav bar (i18n key under book.err). */
-  protected readonly err = signal<'' | 'taken' | 'many' | 'generic'>('');
+  protected readonly err = signal<'' | 'taken' | 'many' | 'generic' | 'down'>('');
 
   protected readonly phoneOk = computed(() => /^01[0125]\d{8}$/.test(this.phone().trim()));
   protected readonly canNext = computed(() => [
@@ -166,8 +166,9 @@ export class Book implements OnInit {
         return;
       }
       if (status === 400 || status === 429) { tab?.close(); this.err.set(status === 429 ? 'many' : 'generic'); return; }
-      // API unreachable (offline / 5xx / timeout): don't lose the customer, send it on WhatsApp with a local code
-      this.code.set(`SHA-${Math.floor(10000 + Math.random() * 90000)}`);
+      // API unreachable (offline / 5xx / timeout): the booking was NOT saved. Say so, and offer WhatsApp
+      // (a message without a booking code, so nobody thinks it's in the system)
+      tab?.close(); this.err.set('down'); return;
     } finally {
       this.sending.set(false);
     }

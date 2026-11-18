@@ -166,9 +166,10 @@ export const EN: Dict = {
       taken: 'This time was just booked — please pick another available time.',
       many: 'Too many booking attempts — try again a bit later or message us on WhatsApp.',
       generic: 'Some details look wrong — check your name and mobile number and try again.',
+      down: "The booking didn't go through — our system isn't answering right now. Try again in a bit, or message us on WhatsApp and we'll book it for you.",
     },
     done: { h: 'Last step: tap Send on WhatsApp', code: 'Booking number', p: 'We opened WhatsApp with your booking message ready — tap Send so it reaches us and we confirm your slot. If WhatsApp did not open, use this button.', wa: 'Open WhatsApp and send', again: 'New booking', track: 'Track booking' },
-    msg: (d: any) => `Hello El Sayed Hassan Auto 👋\nNew booking ${d.code} 🚗\n\nName: ${d.name}\nMobile: ${d.phone}\nCar: Nissan ${d.model} ${d.year}${d.km ? ` — ${d.km} km` : ''}\nServices: ${d.services}\nAppointment: ${d.when}${d.notes ? `\nNotes: ${d.notes}` : ''}`,
+    msg: (d: any) => `Hello El Sayed Hassan Auto 👋\n${d.code ? `New booking ${d.code} 🚗` : "I'd like to book a visit (the website booking didn't go through) 🚗"}\n\nName: ${d.name}\nMobile: ${d.phone}\nCar: Nissan ${d.model} ${d.year}${d.km ? ` — ${d.km} km` : ''}\nServices: ${d.services}\nAppointment: ${d.when}${d.notes ? `\nNotes: ${d.notes}` : ''}`,
   },
   contact: {
     tag: '— CONTACT US —', h: `Visit us or ${G('call us')}`, info: 'Contact details',

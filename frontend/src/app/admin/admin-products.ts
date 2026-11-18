@@ -1,66 +1,47 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { I18n } from '../core/i18n.service';
 import { imgUrl } from '../core/media';
 import { SITE } from '../core/site';
 import { Icon } from '../shared/icon';
-import { AdminApi, Category, CategoryInput, Product, ProductInput } from './admin-api';
-import { apiError, slugify } from './admin-ui';
+import { AdminApi, Category, Product, ProductInput } from './admin-api';
+import { apiError, bySortOrder, moveItem, nextSortOrder, slugify, withChanges } from './admin-ui';
+import { MoveArrows } from './move-arrows';
+import { forkJoin } from 'rxjs';
 import { ImageInput } from './image-input';
+import { autoIcon, autoSlug } from './auto-icon';
 import { AdminFlash } from './admin-flash';
 import { adminTexts } from './admin.i18n';
 import { ConfirmService } from './confirm-dialog';
 
-export const ICONS = ['oil', 'parts', 'susp', 'car', 'ac', 'cpu', 'tire', 'wash', 'paint', 'engine', 'shield', 'gift', 'tag'];
+/** Brands offered in the product form's dropdown (plus any brand already used by a product). */
+const BRANDS = [
+  'Nissan Genuine', 'Mobil', 'Castrol', 'Shell', 'Total', 'Valvoline', 'Motul', 'Liqui Moly', 'Bosch', 'NGK', 'Denso', 'KYB', 'Monroe', 'Sachs',
+  'Brembo', 'TRW', 'Akebono', 'Varta', 'Exide', 'Mann', 'Mahle', 'Valeo', 'Aisin', 'Hella', 'Gates', 'Febi', 'Continental', 'Michelin', 'Bridgestone',
+];
+
+
 
 /** `price` empty/0 = "ask for the price" on the site. English texts are optional: empty = the Arabic text is used. */
 type ProductForm = Omit<ProductInput, 'price'> & { id: number | null; price: number | null; hasBadge: boolean; badgeAr: string; badgeEn: string };
 /** English copy that was saved as "same as Arabic" is shown empty again when editing. */
 const enOnly = (t: { ar: string; en: string }) => ({ ar: t.ar, en: t.en === t.ar ? '' : t.en });
-type CategoryForm = CategoryInput & { id: number | null };
 
-/** Products: list + add/edit form (with image), plus the categories manager. */
+/** Products: list + add/edit form (with image). Categories have their own page (admin-categories.ts). */
 @Component({
   selector: 'app-admin-products',
-  imports: [FormsModule, Icon, ImageInput, AdminFlash],
+  imports: [FormsModule, Icon, ImageInput, AdminFlash, RouterLink, MoveArrows],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let T = t().products; @let C = t();
     <div class="flex flex-wrap items-center gap-3 mb-5">
       <h1 class="text-2xl md:text-3xl font-black flex-1">{{ T.h }}</h1>
-      <button type="button" class="btn !py-2.5 border border-zinc-300 dark:border-ink-600" (click)="showCats.set(!showCats())">{{ T.cats }}</button>
+      <a routerLink="/admin/categories" class="btn !py-2.5 border border-zinc-300 dark:border-ink-600">{{ T.cats }}</a>
       <button type="button" class="btn btn-red !py-2.5" (click)="edit(null)" [disabled]="!cats().length">+ {{ T.add }}</button>
     </div>
 
     @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
-
-    <!-- categories manager -->
-    @if (showCats()) {
-      <section class="card p-5 md:p-6 mb-5">
-        <h2 class="text-lg font-black mb-4">{{ T.cats }}</h2>
-        <form class="grid sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_130px_90px_auto] gap-2 items-end mb-4" (ngSubmit)="saveCat()">
-          <label><span class="lbl">{{ C.f.nameAr }}</span><input class="field" name="car" required maxlength="100" [(ngModel)]="cat.name.ar"></label>
-          <label><span class="lbl">{{ C.f.nameEn }}</span><input class="field" name="cen" dir="ltr" required maxlength="100" [(ngModel)]="cat.name.en" (ngModelChange)="cat.id || (cat.slug = slug($event))"></label>
-          <label><span class="lbl">{{ C.f.slug }}</span><input class="field" name="cslug" dir="ltr" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" [(ngModel)]="cat.slug"></label>
-          <label><span class="lbl">{{ C.f.icon }}</span><select class="field" name="cicon" [(ngModel)]="cat.icon">@for (x of icons; track x) { <option>{{ x }}</option> }</select></label>
-          <label><span class="lbl">{{ C.f.sort }}</span><input class="field" type="number" name="csort" min="0" [(ngModel)]="cat.sortOrder"></label>
-          <div class="flex gap-2">
-            <button type="submit" [disabled]="busy()" class="btn btn-red !px-5 !py-3">{{ cat.id ? C.save : T.add }}</button>
-            @if (cat.id) { <button type="button" class="btn !px-4 !py-3 border border-zinc-300 dark:border-ink-600" (click)="cat = newCat()">{{ C.cancel }}</button> }
-          </div>
-        </form>
-        @for (c of cats(); track c.id) {
-          <div class="flex items-center gap-3 py-2.5 border-t border-zinc-200 dark:border-ink-600">
-            <app-icon [name]="c.icon" class="w-5 h-5 text-brand-red2" />
-            <div class="flex-1 min-w-0"><b>{{ i.l(c.name) }}</b> <small class="muted" dir="ltr">{{ c.slug }}</small>
-              <small class="muted block">{{ T.inCat(c.productCount) }}@if (!c.isActive) { — {{ C.hidden }} }</small></div>
-            <button type="button" class="text-sm font-bold hover:underline" (click)="toggleCat(c)">{{ c.isActive ? C.hide : C.show }}</button>
-            <button type="button" class="text-sm font-bold hover:underline" (click)="cat = { id: c.id, slug: c.slug, icon: c.icon, name: { ar: c.name.ar, en: c.name.en }, sortOrder: c.sortOrder, isActive: c.isActive }">{{ C.edit }}</button>
-            <button type="button" class="text-sm font-bold text-brand-red2 hover:underline" (click)="removeCat(c)">{{ C.del }}</button>
-          </div>
-        }
-      </section>
-    }
 
     <!-- product form -->
     @if (form(); as f) {
@@ -74,14 +55,21 @@ type CategoryForm = CategoryInput & { id: number | null };
             <small class="muted text-xs">{{ T.enHint }}</small></label>
           <label><span class="lbl">{{ T.cat }} *</span>
             <select class="field" name="cat" required [(ngModel)]="f.categoryId" [class.bad]="tried() && !f.categoryId">@for (c of cats(); track c.id) { <option [ngValue]="c.id">{{ i.l(c.name) }}</option> }</select></label>
-          <label><span class="lbl">{{ T.brand }} *</span><input class="field" name="brand" required maxlength="100" [(ngModel)]="f.brand" [class.bad]="tried() && !f.brand.trim()"></label>
+          <label><span class="lbl">{{ T.brand }} *</span>
+            @if (!newBrand()) {
+              <select class="field" name="brand" [ngModel]="f.brand" (ngModelChange)="pickBrand(f, $event)" [class.bad]="tried() && !f.brand.trim()">
+                <option value="" disabled>{{ T.brandPick }}</option>
+                @for (b of brands(); track b) { <option [value]="b">{{ b }}</option> }
+                <option [value]="OTHER">{{ T.brandOther }}</option>
+              </select>
+            } @else {
+              <input class="field" name="brandNew" dir="ltr" maxlength="100" [placeholder]="T.brandNew" [(ngModel)]="f.brand" [class.bad]="tried() && !f.brand.trim()">
+              <button type="button" class="text-xs font-bold text-brand-red2 hover:underline mt-1" (click)="newBrand.set(false); f.brand = ''">{{ T.brandBack }}</button>
+            }
+          </label>
           <label><span class="lbl">{{ T.price }}</span><input class="field" type="number" name="price" min="0" step="0.01" [(ngModel)]="f.price">
             <small class="muted text-xs">{{ T.priceHint }}</small></label>
           <label><span class="lbl">{{ T.oldPrice }}</span><input class="field" type="number" name="old" min="0" step="0.01" [(ngModel)]="f.oldPrice"></label>
-          <div class="grid grid-cols-2 gap-4 sm:col-span-2">
-            <label><span class="lbl">{{ C.f.icon }}</span><select class="field" name="icon" [(ngModel)]="f.icon">@for (x of icons; track x) { <option>{{ x }}</option> }</select></label>
-            <label><span class="lbl">{{ C.f.sort }}</span><input class="field" type="number" name="sort" min="0" [(ngModel)]="f.sortOrder"></label>
-          </div>
         </div>
 
         <!-- models: a dropdown with a checkbox per model -->
@@ -123,7 +111,7 @@ type CategoryForm = CategoryInput & { id: number | null };
 
         @if (formErr()) { <p class="mt-4 text-sm font-bold text-brand-red2" role="alert">{{ formErr() }}</p> }
         <div class="mt-5 flex gap-3">
-          <button type="submit" [disabled]="busy()" class="btn btn-red disabled:opacity-50 disabled:pointer-events-none">{{ busy() ? C.saving : C.save }}</button>
+          <button type="submit" [attr.aria-busy]="busy()" [disabled]="busy()" class="btn btn-red disabled:opacity-50 disabled:pointer-events-none">{{ busy() ? C.saving : C.save }}</button>
           <button type="button" class="btn border border-zinc-300 dark:border-ink-600" (click)="form.set(null)">{{ C.cancel }}</button>
         </div>
       </form>
@@ -144,11 +132,12 @@ type CategoryForm = CategoryInput & { id: number | null };
     @if (failed()) {
       <p class="card p-6 text-center font-bold text-brand-red2" role="alert">{{ C.failed }} <button type="button" class="underline ms-2" (click)="load()">{{ C.retry }}</button></p>
     } @else if (loading()) {
-      <p class="muted font-bold" role="status">{{ C.loading }}</p>
+      <div class="page-loading" role="status"><span class="spinner"></span>{{ C.loading }}</div>
     } @else {
       <div class="space-y-2.5">
-        @for (p of shown(); track p.id) {
+        @for (p of shown(); track p.id; let first = $first, last = $last) {
           <article class="card p-3 md:p-4 flex items-center gap-3 md:gap-4" [class.opacity-60]="!p.isActive">
+            <app-move-arrows [first]="first" [last]="last" [busy]="moving()" (move)="move(p, $event)" />
             <div class="w-16 h-16 shrink-0 rounded-xl bg-zinc-100 dark:bg-ink-900 grid place-items-center overflow-hidden">
               @if (p.img) { <img [src]="src(p.img)" alt="" loading="lazy" class="w-full h-full object-cover"> }
               @else { <app-icon [name]="p.icon" class="w-7 h-7 text-brand-red2" /> }
@@ -180,7 +169,6 @@ export class AdminProducts {
   private readonly api = inject(AdminApi);
   protected readonly i = inject(I18n);
   protected readonly t = adminTexts();
-  protected readonly icons = ICONS;
   protected readonly models = SITE.models;
   protected readonly src = imgUrl;
   protected readonly slug = slugify;
@@ -200,23 +188,35 @@ export class AdminProducts {
     const P = this.t().products;
     return m.length === this.models.length ? P.allPicked : m.length ? this.models.filter(x => m.includes(x)).join('، ') : P.nonePicked;
   }
+  /** All brands for the dropdown: the usual ones + any already used by a product, A→Z. */
+  protected readonly brands = computed(() =>
+    [...new Set([...BRANDS, ...this.items().map(p => p.brand.trim()).filter(Boolean)])].sort((a, b) => a.localeCompare(b)));
+  /** "Another brand" was picked: type a new name instead of choosing from the list. */
+  protected readonly newBrand = signal(false);
+  protected readonly OTHER = '__other__';
+  protected pickBrand(f: ProductForm, v: string) {
+    if (v === this.OTHER) { this.newBrand.set(true); f.brand = ''; } else f.brand = v;
+  }
   protected readonly q = signal('');
   protected readonly catFilter = signal(0);
-  protected readonly showCats = signal(false);
   protected readonly form = signal<ProductForm | null>(null);
-  protected cat: CategoryForm = { id: null, slug: '', icon: 'parts', name: { ar: '', en: '' }, sortOrder: 0, isActive: true };
 
   protected readonly shown = computed(() => {
     const q = this.q().trim().toLowerCase(), c = this.catFilter();
-    return this.items().filter(p => (!c || p.categoryId === c) &&
+    return bySortOrder(this.items()).filter(p => (!c || p.categoryId === c) &&
       (!q || `${p.name.ar} ${p.name.en} ${p.brand} ${p.slug}`.toLowerCase().includes(q)));
   });
 
-  constructor() { this.load(); }
+  constructor() {
+    // opened from the categories page: show only that category
+    const c = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('cat'));
+    if (c) this.catFilter.set(c);
+    this.load();
+  }
 
   protected load() {
     this.loading.set(true); this.failed.set(false);
-    this.api.categories().subscribe({ next: c => { this.cats.set(c); if (!this.cat.id) this.cat = this.newCat(); }, error: () => this.failed.set(true) });
+    this.api.categories().subscribe({ next: c => this.cats.set(c), error: () => this.failed.set(true) });
     this.api.products().subscribe({
       next: p => { this.items.set(p); this.loading.set(false); },
       error: () => { this.loading.set(false); this.failed.set(true); },
@@ -225,15 +225,13 @@ export class AdminProducts {
 
   protected catName(id: number) { return this.i.l(this.cats().find(c => c.id === id)?.name); }
 
-  // ---------- products ----------
-
   protected edit(p: Product | null) {
-    this.formErr.set(''); this.msg.set(''); this.tried.set(false);
+    this.formErr.set(''); this.msg.set(''); this.tried.set(false); this.newBrand.set(false);
     this.form.set(p
       ? { ...p, name: enOnly(p.name), desc: enOnly(p.desc), price: p.price || null, models: [...p.models], hasBadge: !!p.badge,
           badgeAr: p.badge?.ar ?? '', badgeEn: p.badge && p.badge.en !== p.badge.ar ? p.badge.en : '' }
       : { id: null, slug: '', categoryId: this.catFilter() || this.cats()[0]?.id, icon: 'parts', brand: '', name: { ar: '', en: '' }, desc: { ar: '', en: '' },
-          price: null, oldPrice: null, cost: null, models: this.models.slice(), inStock: true, featured: false, img: null, sortOrder: this.items().length, isActive: true,
+          price: null, oldPrice: null, cost: null, models: this.models.slice(), inStock: true, featured: false, img: null, sortOrder: nextSortOrder(this.items()), isActive: true,
           hasBadge: false, badgeAr: '', badgeEn: '' });
     scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -248,12 +246,7 @@ export class AdminProducts {
     if (!f) return;
     const T = this.t(), P = T.products;
     // the page link (slug) is made automatically for new products: from the English name, or a short code
-    if (!f.id) {
-      const base = this.slug(f.name.en) || `p-${Date.now().toString(36)}`, used = new Set(this.items().map(p => p.slug));
-      let s = base;
-      for (let n = 2; used.has(s); n++) s = `${base}-${n}`;
-      f.slug = s;
-    }
+    if (!f.id) f.slug = autoSlug(f.name.en, 'p', this.items().map(p => p.slug), slugify);
 
     this.tried.set(true);
     const missing = [
@@ -267,7 +260,8 @@ export class AdminProducts {
     const tr = (t: { ar: string; en: string }) => ({ ar: t.ar.trim(), en: t.en.trim() || t.ar.trim() });
     const { id, hasBadge, badgeAr, badgeEn, ...rest } = f;
     const body: ProductInput = {
-      ...rest, name: tr(f.name), desc: tr(f.desc), price, oldPrice: price ? f.oldPrice || null : null, cost: f.cost ?? null,
+      ...rest, name: tr(f.name), desc: tr(f.desc), price,
+      icon: autoIcon(`${f.name.ar} ${f.name.en}`, this.cats().find(c => c.id === f.categoryId)?.icon ?? 'parts'), oldPrice: price ? f.oldPrice || null : null, cost: f.cost ?? null,
       badge: hasBadge ? tr({ ar: badgeAr, en: badgeEn }) : null,
     };
     this.busy.set(true); this.formErr.set('');
@@ -294,45 +288,19 @@ export class AdminProducts {
     });
   }
 
-  // ---------- categories ----------
 
-  /** Empty category form; new categories go to the end of the list. */
-  protected newCat(): CategoryForm {
-    return { id: null, slug: '', icon: 'parts', name: { ar: '', en: '' }, sortOrder: this.cats().length, isActive: true };
-  }
-
-  protected saveCat() {
-    const { id, ...body } = this.cat, T = this.t();
-    if (!body.name.ar.trim() || !body.name.en.trim() || !body.slug) return;
-    this.busy.set(true);
-    this.api.saveCategory(id, body).subscribe({
-      next: c => {
-        this.busy.set(false); this.cat = this.newCat();
-        this.cats.update(l => (id ? l.map(x => (x.id === id ? c : x)) : [...l, c]).sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id));
-        this.flash(T.saved);
-      },
-      error: e => { this.busy.set(false); const err = apiError(e); this.flash(err.code === 'slug_taken' ? T.slugTaken : err.message || T.failed, true); },
+  // ---------- order (▲▼) ----------
+  protected readonly moving = signal(false);
+  protected move(x: Product, dir: -1 | 1) {
+    const changed = moveItem(this.items(), this.shown(), x.id, dir);
+    if (!changed.length) return;
+    this.items.update(l => withChanges(l, changed));
+    this.moving.set(true);
+    forkJoin(changed.map(c => { const { id, cat, ...body } = c; return this.api.saveProduct(id, body); })).subscribe({
+      next: () => this.moving.set(false),
+      error: () => { this.moving.set(false); this.flash(this.t().failed, true); this.load(); },
     });
   }
-
-  protected toggleCat(c: Category) {
-    const { id, productCount, ...body } = c;
-    this.api.saveCategory(id, { ...body, isActive: !c.isActive }).subscribe({
-      next: r => this.cats.update(l => l.map(x => (x.id === id ? r : x))),
-      error: () => this.flash(this.t().failed, true),
-    });
-  }
-
-  protected async removeCat(c: Category) {
-    const T = this.t();
-    if (c.productCount) { this.flash(T.products.catInUse, true); return; }
-    if (!(await this.confirm.ask(this.delQ(this.i.l(c.name))))) return;
-    this.api.deleteCategory(c.id).subscribe({
-      next: () => { this.cats.update(l => l.filter(x => x.id !== c.id)); this.flash(T.deleted); },
-      error: e => this.flash(apiError(e).code === 'category_in_use' ? T.products.catInUse : T.failed, true),
-    });
-  }
-
 
   private readonly confirm = inject(ConfirmService);
   /** "Delete X?" popup texts. */

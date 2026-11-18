@@ -60,6 +60,19 @@ public sealed class SiteRebuild(IConfiguration config, IHttpClientFactory http, 
     }
 }
 
+/// <summary>
+/// A stamp that changes every time the dashboard changes something shown on the website. Open website pages
+/// ask for it every few seconds (<c>GET /api/version</c>, tiny and uncached) and reload their data when it
+/// moves, so dashboard edits show up on the site without a refresh. It also moves when the API restarts,
+/// which just makes open pages re-check once.
+/// </summary>
+public sealed class ContentVersion(TimeProvider time)
+{
+    private long stamp = time.GetUtcNow().ToUnixTimeMilliseconds();
+    public long Current => Interlocked.Read(ref stamp);
+    public void Bump() => Interlocked.Exchange(ref stamp, Math.Max(time.GetUtcNow().ToUnixTimeMilliseconds(), Current + 1));
+}
+
 public static class SiteRebuildExtensions
 {
     /// <summary>Dashboard sections whose content is bundled into the website.</summary>
@@ -70,6 +83,7 @@ public static class SiteRebuildExtensions
     {
         services.AddHttpClient();
         services.AddSingleton<SiteRebuild>();
+        services.AddSingleton<ContentVersion>();
         services.AddHostedService(sp => sp.GetRequiredService<SiteRebuild>());
         return services;
     }
@@ -82,6 +96,20 @@ public static class SiteRebuildExtensions
         if (HttpMethods.IsGet(req.Method) || HttpMethods.IsHead(req.Method) || HttpMethods.IsOptions(req.Method)) return;
         if (ctx.Response.StatusCode is < 200 or >= 300) return;
         if (SitePaths.Any(p => req.Path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase)))
+        {
+            ctx.RequestServices.GetRequiredService<ContentVersion>().Bump();
             ctx.RequestServices.GetRequiredService<SiteRebuild>().Request();
+        }
     });
+
+    /// <summary><c>GET /api/version</c> → <c>{ "v": 1763460000000 }</c>: changes whenever website content changes.</summary>
+    public static IEndpointRouteBuilder MapContentVersion(this IEndpointRouteBuilder app)
+    {
+        app.MapGet("/api/version", (ContentVersion v, HttpContext ctx) =>
+        {
+            ctx.Response.Headers.CacheControl = "no-store";
+            return Results.Ok(new { v = v.Current });
+        }).ExcludeFromDescription();
+        return app;
+    }
 }

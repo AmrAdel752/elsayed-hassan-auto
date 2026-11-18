@@ -43,7 +43,7 @@ const PAGE = 20;
       <p class="card p-6 text-center font-bold text-brand-red2" role="alert">{{ t().failed }}
         <button type="button" class="underline ms-2" (click)="reload()">{{ t().retry }}</button></p>
     } @else if (loading() && !items().length) {
-      <p class="muted font-bold" role="status">{{ t().loading }}</p>
+      <div class="page-loading" role="status"><span class="spinner"></span>{{ t().loading }}</div>
     } @else if (!items().length) {
       <p class="card p-10 text-center muted">{{ T.empty }}</p>
     } @else {
@@ -52,7 +52,7 @@ const PAGE = 20;
         @for (b of items(); track b.id) { <app-booking-card [booking]="b" (changed)="onChanged($event)" /> }
       </div>
       @if (items().length < total()) {
-        <button type="button" [disabled]="loading()" (click)="more()" class="btn border border-zinc-300 dark:border-ink-600 mx-auto mt-5 flex">{{ loading() ? t().loading : T.more }}</button>
+        <button type="button" [attr.aria-busy]="loading()" [disabled]="loading()" (click)="more()" class="btn border border-zinc-300 dark:border-ink-600 mx-auto mt-5 flex">{{ loading() ? t().loading : T.more }}</button>
       }
     }
   `,

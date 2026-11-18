@@ -20,7 +20,7 @@ import { adminTexts } from './admin.i18n';
       <p class="card p-6 text-center font-bold text-brand-red2" role="alert">{{ t().failed }}
         <button type="button" class="underline ms-2" (click)="load()">{{ t().retry }}</button></p>
     } @else if (!settings()) {
-      <p class="muted font-bold" role="status">{{ t().loading }}</p>
+      <div class="page-loading" role="status"><span class="spinner"></span>{{ t().loading }}</div>
     } @else {
       @let s = settings()!;
       @if (msg()) { <app-admin-flash [text]="msg()" [bad]="msgBad()" /> }
@@ -42,7 +42,7 @@ import { adminTexts } from './admin.i18n';
             <input class="field" type="number" name="days" min="1" max="90" required [ngModel]="s.maxDaysAhead" (ngModelChange)="patch({ maxDaysAhead: +$event })"></label>
         </fieldset>
         @if (auth.isOwner()) {
-          <button type="submit" [disabled]="busy() || !dirty() || s.openHour >= s.closeHour" class="btn btn-red mt-5 disabled:opacity-50 disabled:pointer-events-none">{{ t().save }}</button>
+          <button type="submit" [attr.aria-busy]="busy()" [disabled]="busy() || !dirty() || s.openHour >= s.closeHour" class="btn btn-red mt-5 disabled:opacity-50 disabled:pointer-events-none">{{ t().save }}</button>
           @if (s.openHour >= s.closeHour) { <small class="block mt-2 text-brand-red2 font-bold">{{ T.badHours }}</small> }
         }
       </form>
@@ -53,7 +53,7 @@ import { adminTexts } from './admin.i18n';
           <h2 class="text-lg font-black mb-4">{{ T.closedDays }}</h2>
           <form class="grid grid-cols-[1fr_auto] gap-2 mb-4" (ngSubmit)="closeDay()">
             <input class="field" type="date" name="d" required [min]="today" [ngModel]="day()" (ngModelChange)="day.set($event)" [attr.aria-label]="T.date">
-            <button type="submit" [disabled]="busy() || !day()" class="btn btn-red !px-5 disabled:opacity-50 disabled:pointer-events-none">{{ T.closeBtn }}</button>
+            <button type="submit" [attr.aria-busy]="busy()" [disabled]="busy() || !day()" class="btn btn-red !px-5 disabled:opacity-50 disabled:pointer-events-none">{{ T.closeBtn }}</button>
             <input class="field col-span-2" name="dr" maxlength="200" [placeholder]="T.reason" [ngModel]="dayReason()" (ngModelChange)="dayReason.set($event)">
           </form>
           @for (d of closedDays(); track d.id) {
@@ -71,7 +71,7 @@ import { adminTexts } from './admin.i18n';
             <input class="field" type="date" name="sd" required [min]="today" [ngModel]="slotDay()" (ngModelChange)="slotDay.set($event)" [attr.aria-label]="T.date">
             <select class="field" name="sh" [ngModel]="slotHour()" (ngModelChange)="slotHour.set(+$event)" [attr.aria-label]="T.hour">
               @for (h of openHours(); track h) { <option [value]="h">{{ hourLabel(h) }}</option> }</select>
-            <button type="submit" [disabled]="busy() || !slotDay()" class="btn btn-red !px-5 disabled:opacity-50 disabled:pointer-events-none">{{ T.closeBtn }}</button>
+            <button type="submit" [attr.aria-busy]="busy()" [disabled]="busy() || !slotDay()" class="btn btn-red !px-5 disabled:opacity-50 disabled:pointer-events-none">{{ T.closeBtn }}</button>
             <input class="field col-span-3" name="sr" maxlength="200" [placeholder]="T.reason" [ngModel]="slotReason()" (ngModelChange)="slotReason.set($event)">
           </form>
           @for (c of closedSlots(); track c.id) {

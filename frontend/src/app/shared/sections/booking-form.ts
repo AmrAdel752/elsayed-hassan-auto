@@ -78,13 +78,16 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
         <input type="text" name="website" ngModel tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -start-[9999px] w-px h-px opacity-0">
 
         @if (err()) {
-          <p class="relative rounded-2xl border border-brand-red/40 bg-brand-red/10 text-brand-red2 p-3 text-sm font-bold" role="alert">{{ i.t('book.err.' + err()) }}</p>
+          <p class="relative rounded-2xl border border-brand-red/40 bg-brand-red/10 text-brand-red2 p-3 text-sm font-bold" role="alert">{{ i.t('book.err.' + err()) }}
+            @if (err() === 'down' && downUrl()) {
+              <a [href]="downUrl()" target="_blank" class="btn bg-[#25d366] text-white !py-2 !px-4 !text-sm mt-2 w-full justify-center"><app-icon name="wa" class="w-4 h-4" />{{ i.t('load.wa') }}</a>
+            }</p>
         }
         @if (code()) {
           <p class="relative rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 p-3 text-sm font-bold" role="status">
             {{ i.t('home.bk.ok') }} <b dir="ltr">{{ code() }}</b></p>
         }
-        <button type="submit" [disabled]="sending()" class="btn btn-red relative w-full justify-center !py-4 text-lg disabled:opacity-60 disabled:pointer-events-none">
+        <button type="submit" [attr.aria-busy]="sending()" [disabled]="sending()" class="btn btn-red relative w-full justify-center !py-4 text-lg disabled:opacity-60 disabled:pointer-events-none">
           <app-icon name="wa" class="w-5 h-5" />{{ sending() ? i.t('book.sending') : i.t('home.bk.submit') }}</button>
         <p class="relative muted text-xs text-center">{{ i.t('home.bk.hint') }}</p>
       </form>
@@ -104,7 +107,7 @@ export class BookingForm {
   private readonly slots = signal<Map<string, number> | null | undefined>(undefined);
   protected readonly slotsState = computed(() => { const s = this.slots(); return s === undefined ? 'loading' : s === null ? 'error' : 'ok'; });
   protected readonly sending = signal(false);
-  protected readonly err = signal<'' | 'taken' | 'many' | 'generic'>('');
+  protected readonly err = signal<'' | 'taken' | 'many' | 'generic' | 'down'>('');
   protected readonly code = signal('');
 
   /** Hours for the chosen day; past hours today are hidden. */
@@ -169,15 +172,26 @@ export class BookingForm {
         return;
       }
       if (status === 400 || status === 429) { tab?.close(); this.err.set(status === 429 ? 'many' : 'generic'); return; }
-      // API unreachable (offline / 5xx / timeout): still send it on WhatsApp, like before the API existed
+      // API unreachable (offline / 5xx / timeout): the booking was NOT saved. Say so and offer WhatsApp
+      // (a message without a booking code), instead of pretending it worked
+      tab?.close(); this.err.set('down'); this.downUrl.set(this.waUrl(v, hour, ''));
+      return;
     } finally {
       this.sending.set(false);
     }
 
+    const url = this.waUrl(v, hour, code);
+    if (tab) tab.location.href = url; else window.open(url, '_blank');
+  }
+
+  /** WhatsApp message for this booking (with its code when it was saved). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private waUrl(v: any, hour: number, code: string) {
     const service = this.i.dict().services.find(s => s.slug === v.service)?.t ?? v.service;
     const model = v.model === 'Other' ? this.i.t('common.other') : v.model;
     const when = new Date(`${v.date}T00:00`).toLocaleDateString(this.i.isAr() ? 'ar-EG-u-nu-latn' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    const url = waLink(this.i.dict().home.bk.msg({ code, name: v.name, phone: v.phone, model, service, date: `${when} — ${this.fmtHour(hour)}`, notes: v.notes }));
-    if (tab) tab.location.href = url; else window.open(url, '_blank');
+    return waLink(this.i.dict().home.bk.msg({ code, name: v.name, phone: v.phone, model, service, date: `${when} — ${this.fmtHour(hour)}`, notes: v.notes }));
   }
+  /** "Send on WhatsApp" link shown when the booking couldn't be saved. */
+  protected readonly downUrl = signal('');
 }

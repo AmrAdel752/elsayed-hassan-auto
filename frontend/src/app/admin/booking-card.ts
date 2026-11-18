@@ -51,7 +51,7 @@ import { ConfirmService } from './confirm-dialog';
       <div class="mt-3 flex items-center gap-2">
         <input class="field !py-2 text-sm" maxlength="1000" [placeholder]="T.notePh" [ngModel]="note()" (ngModelChange)="note.set($event)" (keydown.enter)="saveNote()">
         @if (note() !== (b.adminNote ?? '')) {
-          <button type="button" [disabled]="busy()" (click)="saveNote()" class="btn btn-red !px-4 !py-2 !text-sm hover:!translate-y-0 shrink-0">{{ T.save }}</button>
+          <button type="button" [attr.aria-busy]="busy()" [disabled]="busy()" (click)="saveNote()" class="btn btn-red !px-4 !py-2 !text-sm hover:!translate-y-0 shrink-0">{{ T.save }}</button>
         }
       </div>
       @if (err()) { <p class="mt-2 text-sm font-bold text-brand-red2" role="alert">{{ err() }}</p> }

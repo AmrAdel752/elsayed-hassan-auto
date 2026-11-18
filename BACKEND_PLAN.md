@@ -94,8 +94,12 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 
 - [x] **K7** Instant data: `npm run build` first runs `scripts/snapshot.mts` (live API → `src/app/data/snapshot.ts`, bundled), pages show it at once and refresh from the API in the background. The API calls the Cloudflare Pages deploy hook (`Cloudflare__DeployHookUrl` env var, secret) ~45s after dashboard changes to products / categories / offers / reviews / gallery, so the site rebuilds itself. API packages go in the git-ignored `deploy/` folder
 
+- [x] **K8** Live updates: `GET /api/version` (no-store) changes after every dashboard save; the site polls it every 10s (and on tab focus) and reloads the data, so open pages update without a refresh
+- [x] **K9** Sunday is a weekly day off on the server too (`SlotService.IsWeeklyOff`): slots show it closed and bookings for it are refused
+- [x] **K10** New-booking alerts: the dashboard checks for new bookings every 30s (badge, banner, sound, browser notification). Optional email: `BookingNotifier` sends one per booking once the `Notify__Email__To` and `Notify__Smtp__*` env vars are set (password is secret, host env vars only)
+
 ## Later (optional)
 
-- Notify the owner of new bookings (WhatsApp/SMS/email)
+- Notify the owner of new bookings by WhatsApp/SMS
 - Car tracking (job stages) on top of bookings
 - Customer accounts / service history

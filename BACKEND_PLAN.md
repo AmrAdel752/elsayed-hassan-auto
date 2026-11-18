@@ -85,12 +85,12 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 
 ## K — Deploy
 
-- [ ] **K1** MonsterASP.NET: create site + SQL Server DB
-- [ ] **K2** Production settings via host env vars: connection string, JWT key, CORS origins, owner password
-- [ ] **K3** Publish API + apply migrations + seed
-- [ ] **K4** Cloudflare DNS: `api` record → host, SSL on `api.elsayedhassanauto.com`
-- [ ] **K5** Frontend `environment.ts` → API URL, push (Cloudflare Pages redeploys), full booking test on the live site
-- [ ] **K6** DB backups (host backups or weekly export)
+- [x] **K1** MonsterASP.NET: create site + SQL Server DB (Premium Single, EU; site `site108631`, DB `db80729`)
+- [x] **K2** Production settings via host env vars (Scripting → Environment variables): `ConnectionStrings__Default`, `Jwt__Key`, `Admin__Users__{0,1}__*` (admin + karim, both Owner). CORS origins come from appsettings.json
+- [x] **K3** Publish API + apply migrations + seed. Redeploy: `dotnet publish -c Release -r win-x86 --self-contained false -p:SatelliteResourceLanguages=en -p:DebugType=None`, drop appsettings.Development.json, zip, upload + Unzip into `wwwroot` (File manager). New migrations: `dotnet ef migrations script --idempotent` → DB → Import SQL
+- [x] **K4** Cloudflare DNS: `api` A record → 136.243.185.116 (DNS only), Let's Encrypt SSL on `api.elsayedhassanauto.com`
+- [x] **K5** Frontend `environment.ts` → API URL (already set), live booking test passed
+- [x] **K6** DB backups: Premium plan daily backups, kept 14 days. Dashboard uploads live in the site's `wwwroot/wwwroot/uploads` (never shipped in the publish package)
 
 ## Later (optional)
 

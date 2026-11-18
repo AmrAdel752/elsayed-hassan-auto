@@ -22,7 +22,9 @@
 
   <ItemGroup>
     <!-- seed data read by CatalogSeeder at startup -->
-    <Content Update="DataSeed*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Update="Data\Seed\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- images uploaded from the dashboard live only on the server: never ship local test uploads, never overwrite live ones -->
+    <Content Update="wwwroot\uploads\**" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>

@@ -16,7 +16,7 @@ export const EN: Dict = {
       calc: ['Nissan Periodic Maintenance Calculator', 'Find the next service for your Nissan and its items by model and mileage: 10k, 20k, 40k and 60k km services.'],
       estimate: ['Nissan Service Prices & Cost Estimate', 'Get an approximate cost for your Nissan service or repair before you come — by model, job and parts.'],
       track: ['Track your car', 'Track the status of your car at the center with your booking number.'],
-      models: ['Service for Nissan Sunny, Sentra, Qashqai & All Models', 'Sunny, Sentra, Qashqai, X-Trail, Juke, Tiida, Patrol and Kicks — common issues, maintenance and parts for every Nissan model.'],
+      models: ['Service for Nissan Sunny, Sentra, Qashqai & All Models', 'Sunny, Sentra, Qashqai, X-Trail, Juke, Kicks, Magnite, Tiida, Patrol, Navara, Pathfinder, Altima, Maxima and Murano — common issues, maintenance and parts for every Nissan model.'],
       faq: ['Nissan Maintenance FAQ', 'Answers about booking, prices, warranty, parts and Nissan maintenance services at El Sayed Hassan Auto.'],
       reviews: ['El Sayed Hassan Auto Customer Reviews', 'What customers say about servicing their Nissan cars at El Sayed Hassan Auto in Faisal.'],
       gallery: ['Nissan Workshop Photos — Before & After', 'Photos from the workshop and our work on Nissan cars: rebuilds, suspension, A/C and bodywork — before and after.'],
@@ -249,6 +249,8 @@ export const EN: Dict = {
         ['Can I see the old part?', 'Of course — we show you any part that was replaced.'],
       ] },
       { id: 'center', icon: 'car', t: 'About the center', items: [
+        ['Are you the Nissan dealer?', 'No, we are not the official dealer — we are an independent service center that works on Nissan only. We do periodic services on the Nissan schedule and all repairs with genuine Nissan or approved parts, your choice, and tell you the cost before any work.'],
+        ['Do you service every Nissan model?', 'Yes — Sunny, Sentra, Qashqai, X-Trail, Juke, Kicks, Magnite, Tiida, Patrol, Navara, Pathfinder, Altima, Maxima and Murano, old and new.'],
         ['Do you work on brands other than Nissan?', 'No, we specialize in Nissan only — that is why we know every detail of your car.'],
         ['Where exactly is the center?', 'Al-Mariouteya Ring Road exit, Faisal — opposite the new station — inside Four Seasons Towers, Giza.'],
         ['How do I track my car?', 'On the "Track your car" page with your booking number, or ask us on WhatsApp anytime.'],

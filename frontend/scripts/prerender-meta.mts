@@ -14,7 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AR } from '../src/app/i18n/ar.ts';
 import { SNAPSHOT } from '../src/app/data/snapshot.ts';
-import { CAR_MODELS } from '../src/app/data/models.ts';
+import { CAR_MODELS, MODEL_AR, MODEL_ALT, modelFaq } from '../src/app/data/models.ts';
 import { TIPS } from '../src/app/data/tips.ts';
 
 // Site address used in link previews + sitemap: the SITE_URL env var if set, else the real domain.
@@ -62,10 +62,6 @@ const BUSINESS = { '@id': `${DOMAIN}/#business` };
 const top = (key: string, path: string, priority: number, extra: Partial<Page> = {}): Page =>
   ({ path, title: `${pages[key][0]} | ${site}`, desc: pages[key][1], name: pages[key][0], priority, ...extra });
 
-/** Arabic model names, the way people type them in search. */
-const MODEL_AR: Record<string, string> = {
-  Sunny: 'صني', Sentra: 'سنترا', Qashqai: 'قشقاي', 'X-Trail': 'إكس تريل', Juke: 'جوك', Tiida: 'تيدا', Patrol: 'باترول', Kicks: 'كيكس', Magnite: 'ماجنايت',
-};
 const arName = (name: string) => MODEL_AR[name] ?? name;
 
 const allFaq = (AR.faq.groups as { items: string[][] }[]).flatMap(g => g.items);
@@ -124,14 +120,28 @@ const routes: Page[] = [
     }],
   })),
 
-  ...CAR_MODELS.map((m): Page => ({
-    path: `models/${m.slug}`, parent: 'models', name: `نيسان ${arName(m.name)}`, priority: 0.7,
-    title: `صيانة نيسان ${arName(m.name)} (Nissan ${m.name}) — أعطال وقطع غيار | ${site}`, desc: m.tagline.ar,
-    kw: [`صيانة نيسان ${arName(m.name)}`, `صيانة ${arName(m.name)}`, `أعطال نيسان ${arName(m.name)}`, `قطع غيار نيسان ${arName(m.name)}`, `مركز صيانة نيسان ${arName(m.name)}`,
-      `عيوب نيسان ${arName(m.name)}`, `Nissan ${m.name} service`, `Nissan ${m.name} maintenance`],
-    body: `<p>${esc(m.tagline.ar)}</p><p>${esc(m.years)} — ${esc(m.engine)} — ${esc(m.gearbox.ar)}</p>` +
-      `<h2>الأعطال الشائعة في نيسان ${esc(arName(m.name))} (${esc(m.name)})</h2>${m.issues.map(i => `<h3>${esc(i.title.ar)}</h3><p>${esc(i.desc.ar)}</p>`).join('')}`,
-  })),
+  ...CAR_MODELS.map((m): Page => {
+    const ar = arName(m.name), n = `نيسان ${ar}`, qa = modelFaq(m, true, AR.top.addr, AR.top.hours);
+    return {
+      path: `models/${m.slug}`, parent: 'models', name: n, priority: 0.8,
+      title: `صيانة ${n} (Nissan ${m.name}) — أعطال وقطع غيار | ${site}`,
+      desc: `مركز صيانة ${n} في فيصل والجيزة — ${m.tagline.ar} صيانة دورية وفتيس وعفشة وتكييف وقطع غيار أصلية. احجز على واتساب.`,
+      kw: [`صيانة ${n}`, `مركز صيانة ${n}`, `صيانة ${ar}`, `أعطال ${n}`, `عيوب ${n}`, `قطع غيار ${n}`, `توكيل ${n}`, `ورشة ${n}`,
+        ...(MODEL_ALT[m.name] ?? []).map(x => `صيانة ${x}`), `Nissan ${m.name} service`, `Nissan ${m.name} maintenance`],
+      body: `<p>${esc(m.tagline.ar)}</p><p>${esc(m.years)} — ${esc(m.engine)} — ${esc(m.gearbox.ar)}</p>` +
+        `<h2>خدمات صيانة ${esc(n)} في فيصل والجيزة</h2>` +
+        ul(AR.services.map(s => `${link(`services/${s.slug}`, `${s.t} ${n}`)} — ${esc(s.d)}`)) +
+        `<h2>الأعطال الشائعة في ${esc(n)} (${esc(m.name)})</h2>${m.issues.map(i => `<h3>${esc(i.title.ar)}</h3><p>${esc(i.desc.ar)}</p>`).join('')}` +
+        `<h2>أسئلة عن ${esc(n)}</h2>${faqHtml(qa)}<h2>موديلات نيسان التانية</h2>${modelLinks}`,
+      ld: [
+        {
+          '@context': 'https://schema.org', '@type': 'Service', name: `صيانة ${n}`, serviceType: 'صيانة سيارات نيسان',
+          description: m.tagline.ar, provider: BUSINESS, areaServed: 'الجيزة', url: `${DOMAIN}/models/${m.slug}`,
+        },
+        faqLd(qa),
+      ],
+    };
+  }),
 
   ...TIPS.map((t): Page => ({
     path: `tips/${t.slug}`, parent: 'tips', name: t.title.ar, priority: 0.5,

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input } f
 import { Seo } from '../../core/seo.service';
 import { RouterLink } from '@angular/router';
 import { I18n } from '../../core/i18n.service';
-import { CAR_MODELS, MODEL_AR } from '../../data/models';
+import { CAR_MODELS, MODEL_AR, modelFaq } from '../../data/models';
 import { CatalogStore } from '../../core/catalog.store';
 import { PageBanner } from '../../shared/page-banner';
 import { ProductCard } from '../../shared/product-card';
@@ -73,6 +73,21 @@ import { Reveal } from '../../shared/reveal.directive';
         </section>
       }
 
+      <!-- questions people search for -->
+      <section class="py-12 md:py-20">
+        <div class="wrap max-w-4xl">
+          <h2 class="text-xl md:text-3xl font-black mb-5 md:mb-8">{{ i.isAr() ? 'أسئلة عن ' + arName() : 'Questions about the Nissan ' + m.name }}</h2>
+          <div class="space-y-3">
+            @for (q of faq(); track $index) {
+              <details class="card p-5 group" [open]="$first">
+                <summary class="font-extrabold cursor-pointer list-none flex items-center justify-between gap-3">{{ q[0] }}<span class="text-brand-red2 group-open:rotate-45 transition-transform text-2xl leading-none">+</span></summary>
+                <p class="muted mt-3">{{ q[1] }}</p>
+              </details>
+            }
+          </div>
+        </div>
+      </section>
+
       <!-- other models -->
       <section class="py-12 md:py-20">
         <div class="wrap">
@@ -104,6 +119,11 @@ export class ModelDetails {
   /** Bound from the `:slug` route param. */
   readonly slug = input<string>();
   protected readonly car = computed(() => CAR_MODELS.find(m => m.slug === this.slug()));
+  protected readonly arName = computed(() => `نيسان ${MODEL_AR[this.car()?.name ?? ''] ?? this.car()?.name}`);
+  protected readonly faq = computed(() => {
+    const m = this.car(), d = this.i.dict();
+    return m ? modelFaq(m, this.i.isAr(), d.top.addr, d.top.hours) : [];
+  });
   protected readonly title = computed(() => `NISSAN <span class="text-brand-red2">${this.car()?.name.toUpperCase()}</span>`);
   protected readonly specs = computed(() => {
     const m = this.car()!;

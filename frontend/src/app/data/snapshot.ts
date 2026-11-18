@@ -9,7 +9,7 @@ export interface Snapshot {
 }
 
 export const SNAPSHOT: Snapshot = {
- "at": "2026-11-18T09:45:43.836Z",
+ "at": "2026-11-18T14:35:55.101Z",
  "categories": [
   {
    "id": "oils",
@@ -92,80 +92,6 @@ export const SNAPSHOT: Snapshot = {
     "ar": "الأكثر طلباً",
     "en": "Best seller"
    }
-  },
-  {
-   "slug": "nissan-cvt-ns3",
-   "cat": "oils",
-   "icon": "oil",
-   "brand": "Nissan Genuine",
-   "name": {
-    "ar": "زيت فتيس CVT NS-3 — 1 لتر",
-    "en": "CVT Fluid NS-3 — 1L"
-   },
-   "desc": {
-    "ar": "زيت فتيس CVT الأصلي المخصص لفتيسات نيسان الأوتوماتيك.",
-    "en": "Genuine CVT fluid made for Nissan automatic CVT gearboxes."
-   },
-   "price": 980,
-   "models": [
-    "Sentra",
-    "Qashqai",
-    "X-Trail",
-    "Juke",
-    "Kicks"
-   ],
-   "inStock": true,
-   "featured": true
-  },
-  {
-   "slug": "mobil-10w40-4l",
-   "cat": "oils",
-   "icon": "oil",
-   "brand": "Mobil",
-   "name": {
-    "ar": "زيت موبيل 10W-40 — 4 لتر",
-    "en": "Mobil 10W-40 — 4L"
-   },
-   "desc": {
-    "ar": "زيت نص تخليقي مناسب للعربيات اللي عدت 100 ألف كم.",
-    "en": "Semi-synthetic oil suited for cars above 100,000 km."
-   },
-   "price": 1100,
-   "models": [
-    "Sunny",
-    "Sentra",
-    "Qashqai",
-    "X-Trail",
-    "Juke",
-    "Tiida",
-    "Patrol",
-    "Kicks"
-   ],
-   "inStock": true,
-   "featured": false
-  },
-  {
-   "slug": "oil-filter-sunny",
-   "cat": "filters",
-   "icon": "parts",
-   "brand": "Nissan Genuine",
-   "name": {
-    "ar": "فلتر زيت أصلي",
-    "en": "Genuine Oil Filter"
-   },
-   "desc": {
-    "ar": "فلتر زيت نيسان الأصلي لموتورات 1.5 و1.6.",
-    "en": "Genuine Nissan oil filter for 1.5 and 1.6 engines."
-   },
-   "price": 220,
-   "oldPrice": 260,
-   "models": [
-    "Sunny",
-    "Tiida",
-    "Sentra"
-   ],
-   "inStock": true,
-   "featured": true
   },
   {
    "slug": "air-filter-qashqai",
@@ -325,61 +251,6 @@ export const SNAPSHOT: Snapshot = {
    ],
    "inStock": true,
    "featured": false
-  },
-  {
-   "slug": "spark-plugs-iridium",
-   "cat": "electrical",
-   "icon": "cpu",
-   "brand": "NGK",
-   "name": {
-    "ar": "طقم بوجيهات إريديوم",
-    "en": "Iridium Spark Plugs (set of 4)"
-   },
-   "desc": {
-    "ar": "بوجيهات NGK إريديوم بتعيش أطول وبتحسن الاشتعال.",
-    "en": "NGK iridium plugs that last longer and improve ignition."
-   },
-   "price": 1200,
-   "oldPrice": 1400,
-   "models": [
-    "Sunny",
-    "Sentra",
-    "Qashqai",
-    "X-Trail",
-    "Juke",
-    "Tiida",
-    "Patrol",
-    "Kicks"
-   ],
-   "inStock": true,
-   "featured": true
-  },
-  {
-   "slug": "battery-70ah",
-   "cat": "electrical",
-   "icon": "cpu",
-   "brand": "Varta",
-   "name": {
-    "ar": "بطارية 70 أمبير",
-    "en": "Battery 70Ah"
-   },
-   "desc": {
-    "ar": "بطارية Varta بضمان سنة.",
-    "en": "Varta battery with a 1-year warranty."
-   },
-   "price": 4200,
-   "models": [
-    "Sunny",
-    "Sentra",
-    "Qashqai",
-    "X-Trail",
-    "Juke",
-    "Tiida",
-    "Patrol",
-    "Kicks"
-   ],
-   "inStock": true,
-   "featured": true
   }
  ],
  "offers": [

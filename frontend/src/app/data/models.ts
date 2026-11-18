@@ -19,6 +19,14 @@ const IDLE_ISSUE: Issue = { service: 'maintenance', title: T('رعشة في ال
 /** Arabic model names, the way people type them in search ("صيانة نيسان صني"). */
 export const MODEL_AR: Record<string, string> = {
   Sunny: 'صني', Sentra: 'سنترا', Qashqai: 'قشقاي', 'X-Trail': 'إكس تريل', Juke: 'جوك', Tiida: 'تيدا', Patrol: 'باترول', Kicks: 'كيكس', Magnite: 'ماجنايت',
+  Navara: 'نافارا', Pathfinder: 'باثفايندر', Altima: 'ألتيما', Maxima: 'ماكسيما', Murano: 'مورانو',
+};
+
+/** Other ways people spell the model name in search (for the page keywords). */
+export const MODEL_ALT: Record<string, string[]> = {
+  Sunny: ['صنى', 'صاني'], Sentra: ['سينترا'], Qashqai: ['كاشكاي', 'قاشقاي'], 'X-Trail': ['اكس تريل', 'اكستريل', 'إكستريل'],
+  Juke: ['جوك نيسان'], Tiida: ['تيدا نيسان', 'تييدا'], Patrol: ['باترول نيسان'], Kicks: ['كيكس نيسان'], Magnite: ['ماجنيت', 'ماجنايت'],
+  Navara: ['نافارا نيسان', 'نيسان دبل كابينة'], Pathfinder: ['باث فايندر'], Altima: ['التيما'], Maxima: ['ماكسيما نيسان'], Murano: ['مورانو نيسان'],
 };
 
 export const CAR_MODELS: CarModel[] = [
@@ -46,4 +54,42 @@ export const CAR_MODELS: CarModel[] = [
   { slug: 'kicks', name: 'Kicks', type: SUV, years: '2017 — 2026', engine: '1.5L / 1.6L', gearbox: T('CVT', 'CVT'),
     tagline: T('كروس أوفر عملي للمدينة — اقتصادي ومريح.', 'A practical city crossover — economical and comfortable.'),
     issues: [CVT_ISSUE, AC_ISSUE, SUSP_ISSUE] },
+  { slug: 'magnite', name: 'Magnite', type: SUV, years: '2021 — 2026', engine: '1.0L / 1.0T', gearbox: T('عادي / CVT', 'Manual / CVT'),
+    tagline: T('أصغر SUV من نيسان — اقتصادي، وموتوره التيربو محتاج زيت مظبوط في ميعاده.', 'Nissan\'s smallest SUV — economical, and its turbo engine needs the right oil on time.'),
+    issues: [CVT_ISSUE, IDLE_ISSUE, AC_ISSUE] },
+  { slug: 'navara', name: 'Navara', type: T('بيك أب دبل كابينة', 'Double-cab pickup'), years: '2015 — 2026', engine: '2.5L', gearbox: T('عادي / أوتوماتيك', 'Manual / Automatic'),
+    tagline: T('بيك أب شغل وتحمّل — بنهتم بعفشته وفرامله علشان الحمولة.', 'A tough work pickup — we look after its suspension and brakes for the load.'),
+    issues: [SUSP_ISSUE, IDLE_ISSUE, AC_ISSUE] },
+  { slug: 'pathfinder', name: 'Pathfinder', type: SUV, years: '2013 — 2026', engine: '3.5L V6', gearbox: T('CVT / أوتوماتيك', 'CVT / Automatic'),
+    tagline: T('SUV عائلي 7 ركاب بموتور V6 — محتاج خبرة في الفتيس والتبريد.', 'A 7-seat family SUV with a V6 — it needs gearbox and cooling expertise.'),
+    issues: [CVT_ISSUE, AC_ISSUE, SUSP_ISSUE] },
+  { slug: 'altima', name: 'Altima', type: SEDAN, years: '2013 — 2026', engine: '2.5L', gearbox: T('CVT', 'CVT'),
+    tagline: T('سيدان كبيرة مريحة — فتيسها الـ CVT عايز زيت وبرمجة صح.', 'A roomy, comfortable sedan — its CVT needs the right fluid and relearn.'),
+    issues: [CVT_ISSUE, SUSP_ISSUE, AC_ISSUE] },
+  { slug: 'maxima', name: 'Maxima', type: SEDAN, years: '2009 — 2023', engine: '3.5L V6', gearbox: T('CVT', 'CVT'),
+    tagline: T('سيدان فاخرة بموتور V6 قوي — بنحافظ على أداءها زي ما هو.', 'A premium V6 sedan — we keep its performance as it should be.'),
+    issues: [CVT_ISSUE, IDLE_ISSUE, AC_ISSUE] },
+  { slug: 'murano', name: 'Murano', type: SUV, years: '2015 — 2026', engine: '3.5L V6', gearbox: T('CVT', 'CVT'),
+    tagline: T('كروس أوفر فاخر — صيانته الدورية في ميعادها بتطوّل عمره.', 'A premium crossover — on-time service keeps it going for years.'),
+    issues: [CVT_ISSUE, SUSP_ISSUE, AC_ISSUE] },
 ];
+
+/**
+ * Questions people ask about one model ("فين أقرب مركز صيانة نيسان صني؟"), shown on the model page
+ * and in its search-engine copy. `addr` / `hours` come from the dictionary so they stay in one place.
+ */
+export function modelFaq(m: CarModel, ar: boolean, addr: string, hours: string): [string, string][] {
+  const n = ar ? `نيسان ${MODEL_AR[m.name] ?? m.name}` : `Nissan ${m.name}`;
+  const cvt = m.gearbox.en.includes('CVT');
+  return ar ? [
+    [`فين أقرب مركز صيانة ${n}؟`, `السيد حسن أوتو — مركز متخصص في نيسان بس: ${addr}. ${hours}. احجز من الموقع أو على واتساب 01080941711.`],
+    [`إنتو توكيل ${n}؟`, `لأ، إحنا مش التوكيل الرسمي — إحنا مركز صيانة مستقل متخصص في نيسان بس، بنصلّح ${n} بقطع أصلية نيسان أو بديل معتمد حسب اختيارك، وبنقولك التكلفة قبل أي شغل.`],
+    [`إمتى أعمل صيانة دورية لـ ${n}؟`, `غيّر الزيت والفلتر كل 10,000 كم (أو كل 5,000 كم لو أغلب سواقتك في الزحمة والحر) واعمل فحص شامل في نفس الميعاد${cvt ? '، وزيت فتيس الـ CVT كل حوالي 60,000 كم' : ''}. احسب جدول عربيتك من حاسبة الصيانة.`],
+    [`بتوفروا قطع غيار ${n} أصلية؟`, `أيوه، بنوفر قطع غيار أصلية نيسان وبديل معتمد لـ ${n}، وبنقولك فرق السعر قبل التركيب.`],
+  ] : [
+    [`Where is a ${n} service center near me?`, `El Sayed Hassan Auto — a Nissan-only center: ${addr}. ${hours}. Book on the site or on WhatsApp 01080941711.`],
+    [`Are you the ${n} dealer?`, `No, we are not the official dealer — we are an independent Nissan-only service center. We repair the ${n} with genuine Nissan or approved parts, your choice, and tell you the cost before any work.`],
+    [`When does the ${n} need periodic service?`, `Change the oil and filter every 10,000 km (or every 5,000 km if you mostly drive in traffic and heat) with a full inspection at the same time${cvt ? ', and the CVT fluid about every 60,000 km' : ''}. Work out your car's schedule with the maintenance calculator.`],
+    [`Do you have genuine ${n} parts?`, `Yes, we supply genuine Nissan and approved parts for the ${n}, and tell you the price difference before fitting.`],
+  ];
+}

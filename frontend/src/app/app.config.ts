@@ -20,7 +20,27 @@ function reloadOnStaleCode(e: NavigationError) {
     if (Date.now() - last < 60_000) return;
     sessionStorage.setItem('sha-reload', String(Date.now()));
   } catch { /* storage blocked: still reload once */ }
-  location.assign(e.url);
+  const url = /https?:\/\/\S+?\.js/.exec(msg)?.[0];
+  repairCache(url).finally(() => location.assign(e.url));
+}
+
+/**
+ * A chunk asked for while Cloudflare was still deploying gets the HTML page back (status 200),
+ * and the browser keeps that wrong copy for hours. Download the failing chunk and the chunks it
+ * imports again, skipping the browser cache, so the reload gets the real files.
+ */
+async function repairCache(first?: string) {
+  if (!first || new URL(first).origin !== location.origin) return;
+  const seen = new Set<string>(), todo = [first];
+  while (todo.length && seen.size < 40) {
+    const u = todo.pop()!;
+    if (seen.has(u)) continue;
+    seen.add(u);
+    try {
+      const text = await (await fetch(u, { cache: 'reload' })).text();
+      for (const m of text.matchAll(/from"\.\/([\w-]+\.js)"/g)) todo.push(new URL(m[1], u).href);
+    } catch { /* offline: the reload will show the error */ }
+  }
 }
 
 export const appConfig: ApplicationConfig = {

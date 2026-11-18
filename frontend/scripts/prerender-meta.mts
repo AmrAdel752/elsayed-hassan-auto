@@ -13,7 +13,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AR } from '../src/app/i18n/ar.ts';
-import { PRODUCTS } from '../src/app/data/catalog.ts';
+import { SNAPSHOT } from '../src/app/data/snapshot.ts';
 import { CAR_MODELS } from '../src/app/data/models.ts';
 import { TIPS } from '../src/app/data/tips.ts';
 
@@ -28,6 +28,9 @@ const swapDomain = (s: string) => s.replaceAll(PLACEHOLDER, DOMAIN);
 const shell = swapDomain(readFileSync(join(dist, 'index.html'), 'utf8'));
 writeFileSync(join(dist, 'robots.txt'), swapDomain(readFileSync(join(dist, 'robots.txt'), 'utf8')));
 const site = AR.meta.site;
+// live products (downloaded by scripts/snapshot.mts just before the build); 0 = no price set -> "ask for the price"
+const PRODUCTS = SNAPSHOT.products;
+const priceText = (n: number) => (n > 0 ? `${n} ج.م` : 'اسأل عن السعر');
 const pages = AR.meta.pages as Record<string, string[]>;
 
 interface Page {
@@ -77,7 +80,7 @@ const routes: Page[] = [
   },
   top('services', 'services', 0.9, { body: serviceLinks }),
   top('book', 'book', 0.9),
-  top('products', 'products', 0.8, { body: ul(PRODUCTS.map(p => `${link(`products/${p.slug}`, p.name.ar)} — ${p.price} ج.م`)) }),
+  top('products', 'products', 0.8, { body: ul(PRODUCTS.map(p => `${link(`products/${p.slug}`, p.name.ar)} — ${priceText(p.price)}`)) }),
   top('offers', 'offers', 0.8),
   top('calc', 'maintenance-calculator', 0.7),
   top('estimate', 'estimate', 0.7),
@@ -110,14 +113,14 @@ const routes: Page[] = [
     path: `products/${p.slug}`, parent: 'products', name: p.name.ar, priority: 0.6,
     title: `${p.name.ar} | ${site}`, desc: p.desc.ar,
     kw: [p.name.ar, p.name.en, `سعر ${p.name.ar}`, `${p.brand} نيسان`, ...p.models.slice(0, 4).map(m => `قطع غيار نيسان ${arName(m)}`)],
-    body: `<p>${esc(p.desc.ar)}</p><p>السعر: ${p.price} ج.م — ${esc(p.brand)}</p><p>مناسب لـ: ${esc(p.models.map(m => `نيسان ${arName(m)}`).join('، '))}</p>`,
+    body: `<p>${esc(p.desc.ar)}</p><p>السعر: ${priceText(p.price)} — ${esc(p.brand)}</p><p>مناسب لـ: ${esc(p.models.map(m => `نيسان ${arName(m)}`).join('، '))}</p>`,
     ld: [{
       '@context': 'https://schema.org', '@type': 'Product', name: p.name.ar, description: p.desc.ar,
       brand: { '@type': 'Brand', name: p.brand }, image: `${DOMAIN}/logo.jpg`,
-      offers: {
+      ...(p.price > 0 && { offers: {
         '@type': 'Offer', price: p.price, priceCurrency: 'EGP', url: `${DOMAIN}/products/${p.slug}`,
         availability: `https://schema.org/${p.inStock ? 'InStock' : 'OutOfStock'}`, seller: BUSINESS,
-      },
+      } }),
     }],
   })),
 

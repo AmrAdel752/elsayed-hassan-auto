@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, timeout } from 'rxjs';
+import { Observable, retry, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 /** One day from `GET /api/slots`; `left` = places left (0 = full, closed or past). */
@@ -22,7 +22,8 @@ export class BookingApi {
   private readonly base = environment.apiUrl;
 
   slots(days = 14): Observable<SlotDay[]> {
-    return this.http.get<SlotDay[]>(`${this.base}/api/slots`, { params: { days } }).pipe(timeout(10000));
+    // the server may be waking up: be patient and retry before giving up
+    return this.http.get<SlotDay[]>(`${this.base}/api/slots`, { params: { days } }).pipe(timeout(20000), retry({ count: 2, delay: 1500 }));
   }
 
   /** 201 → code; 409 = slot just filled / already booked; 400 = validation; 429 = too many. */

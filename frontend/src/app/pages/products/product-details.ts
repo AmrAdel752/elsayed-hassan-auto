@@ -40,7 +40,7 @@ import { Reveal } from '../../shared/reveal.directive';
             <p class="muted text-base md:text-lg leading-loose mb-5 md:mb-6">{{ i.l(p.desc) }}</p>
 
             <div class="flex items-baseline flex-wrap gap-3 mb-2">
-              <b class="text-3xl md:text-4xl font-black text-brand-red2">{{ i.price(p.price) }}</b>
+              <b class="text-3xl md:text-4xl font-black text-brand-red2">{{ i.productPrice(p.price) }}</b>
               @if (p.oldPrice) {
                 <s class="muted text-lg">{{ i.price(p.oldPrice) }}</s>
                 <span class="px-2.5 py-1 rounded-lg bg-brand-gold/20 text-brand-dgold dark:text-brand-gold text-sm font-black">{{ i.t('shop.save') }} {{ i.price(p.oldPrice - p.price) }}</span>
@@ -71,7 +71,7 @@ import { Reveal } from '../../shared/reveal.directive';
       <div class="lg:hidden fixed inset-x-0 bottom-[calc(68px+env(safe-area-inset-bottom))] z-[55] flex items-center gap-3 px-4 py-2.5 bg-white/95 dark:bg-ink-800/95 backdrop-blur border-t border-zinc-200 dark:border-ink-600">
         <div class="min-w-0 flex-1">
           @if (p.oldPrice) { <s class="muted text-[11px] block leading-none">{{ i.price(p.oldPrice) }}</s> }
-          <b class="text-lg font-black text-brand-red2 whitespace-nowrap">{{ i.price(p.price) }}</b>
+          <b class="text-lg font-black text-brand-red2 whitespace-nowrap">{{ i.productPrice(p.price) }}</b>
         </div>
         <a [href]="wa()" target="_blank" class="btn !py-2.5 !px-5 bg-[#25d366] text-white text-sm"><app-icon name="wa" class="w-5 h-5" />{{ i.t('shop.order') }}</a>
       </div>
@@ -87,7 +87,7 @@ import { Reveal } from '../../shared/reveal.directive';
           </div>
         </section>
       }
-    } @else if (store.ready()) {
+    } @else if (productsSynced()) {
       <section class="wrap min-h-[50vh] grid place-items-center text-center py-24">
         <div><h1 class="h2">{{ i.t('shop.notFound') }}</h1><a routerLink="/products" class="btn btn-red mt-6">{{ i.t('nav.products') }}</a></div>
       </section>
@@ -102,7 +102,10 @@ export class ProductDetails {
   private readonly seoFx = effect(() => { const p = this.product(); if (p) this.seo.set({ title: this.i.l(p.name), desc: this.i.l(p.desc) }); });
   /** Bound from the `:slug` route param. */
   readonly slug = input<string>();
-  protected readonly store = inject(CatalogStore);
+  private readonly store = inject(CatalogStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
+  protected readonly productsSynced = this.store.productsSynced;
   protected readonly product = computed(() => this.store.products().find(p => p.slug === this.slug()));
   protected readonly cat = computed(() => this.store.categories().find(c => c.id === this.product()?.cat));
   protected readonly off = computed(() => {
@@ -118,6 +121,6 @@ export class ProductDetails {
   });
   protected readonly wa = computed(() => {
     const p = this.product();
-    return p ? waLink(this.i.dict().shop.msg(this.i.l(p.name), this.i.price(p.price))) : '';
+    return p ? waLink(this.i.dict().shop.msg(this.i.l(p.name), this.i.productPrice(p.price))) : '';
   });
 }

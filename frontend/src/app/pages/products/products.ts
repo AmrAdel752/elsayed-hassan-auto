@@ -58,6 +58,8 @@ import { Icon } from '../../shared/icon';
 export class Products implements OnInit {
   protected readonly i = inject(I18n);
   private readonly store = inject(CatalogStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
   protected readonly models = SITE.models;
   /** Optional `?cat=` preselect. */
   readonly catParam = input<string>(undefined, { alias: 'cat' });

@@ -22,14 +22,15 @@ export const EN: Dict = {
       gallery: ['Nissan Workshop Photos — Before & After', 'Photos from the workshop and our work on Nissan cars: rebuilds, suspension, A/C and bodywork — before and after.'],
       tips: ['Nissan Car-Care Tips', 'Tips from Nissan specialists to keep your car healthy: oil, CVT gearbox, A/C and brakes — and save on maintenance.'],
       about: ['About Us — Nissan Specialists in Faisal', 'El Sayed Hassan Auto: a Nissan-only service center in Al-Mariouteya, Faisal, Giza — experienced technicians, modern diagnostics and genuine parts.'],
-      contact: ['Nissan Service Center Address & Phone in Faisal', 'Address of El Sayed Hassan Auto at the Mariouteya ring-road exit in Faisal, phone and WhatsApp 01080941711, open daily 10 AM to 10 PM.'],
+      contact: ['Nissan Service Center Address & Phone in Faisal', 'Address of El Sayed Hassan Auto at the Mariouteya ring-road exit in Faisal, phone and WhatsApp 01080941711, open 10 AM to 10 PM every day except Sunday.'],
       admin: ['Dashboard', 'El Sayed Hassan Auto dashboard.'],
       notFound: ['Page not found', 'The page you are looking for does not exist.'],
     },
   },
   brand: { a: 'El Sayed Hassan', b: 'Auto' },
-  top: { short: 'Open daily 10AM – 10PM', hours: 'Open daily from 10 AM to 10 PM — 7 days a week', addr: 'Al-Mariouteya Ring Road exit, Faisal — inside Four Seasons Towers' },
+  top: { short: 'Open 10AM – 10PM • Closed Sundays', hours: 'Open from 10 AM to 10 PM — every day except Sunday', addr: 'Al-Mariouteya Ring Road exit, Faisal — inside Four Seasons Towers' },
   nav: { home: 'Home', services: 'Services', products: 'Parts', calc: 'Maintenance calculator', models: 'Nissan models', track: 'Track your car', estimate: 'Price estimate', tools: 'Handy tools', contactShort: 'Contact', faq: 'FAQ', reviews: 'Reviews', gallery: 'Gallery', tips: 'Car-care tips', book: 'Book', offers: 'Offers', about: 'About', contact: 'Contact', bookNow: 'Book Now', skip: 'Skip to content' },
+  load: { wait: 'Loading...', fail: "We can't reach the server right now", failP: 'Please try again in a moment, or message us on WhatsApp.', retry: 'Try again', wa: 'Message us on WhatsApp' },
   common: { more: 'Learn more', choose: 'Choose...', other: 'Other model', soon: 'This page is coming soon', back: 'Back to home' },
   badge: { title: 'Nissan Specialists Only', sub: 'Service • Parts • Computer Diagnostics' },
   services: [
@@ -125,7 +126,7 @@ export const EN: Dict = {
         { icon: 'shield', t: '100% Nissan Focus', d: 'We work on Nissan only, so we know every detail of your car.' },
         { icon: 'cpu', t: 'Modern Diagnostics', d: 'Computer diagnostics pinpoint the fault with no guesswork.' },
         { icon: 'tag', t: 'Clear Pricing', d: 'We tell you the cost before we start — no surprises.' },
-        { icon: 'clock', t: 'Flexible Hours', d: 'Open 12 hours a day, every day of the week.' },
+        { icon: 'clock', t: 'Flexible Hours', d: 'Open 12 hours a day, 6 days a week (closed on Sunday).' },
       ],
       ns: { badge: 'We service every Nissan model', sub: 'From Sunny to Patrol', h: `From ${G('Sunny')} to ${G('Qashqai')}..<br>your car is safe with us`, p: 'A technical team specialized in every Nissan model on the Egyptian market.' },
     },
@@ -133,7 +134,7 @@ export const EN: Dict = {
       tag: '— BOOK IN A MINUTE —', h: `Booking is ${G('easier')} than ever`, p: 'Fill in the details and a ready WhatsApp message opens — no typing needed',
       steps: [['Fill the form', 'Pick your car model and service'], ['Pick a time', 'Choose the slot that suits you'], ['Inspection', 'We diagnose and quote before any work'], ['Drive away', 'Your car is ready and tuned up']],
       form: 'Book your visit', name: 'Name', phName: 'Your name', model: 'Car model', service: 'Service', date: 'Preferred day',
-      phone: 'Mobile number', time: 'Time', pickDate: 'Pick a day first', noTimes: 'No free times on this day', full: 'Full', ok: 'Your booking is saved — booking number',
+      phone: 'Mobile number', time: 'Time', pickDate: 'Pick a day first', dayOff: 'Sunday is our day off — pick another day', noTimes: 'No free times on this day', full: 'Full', ok: 'Your booking is saved — booking number',
       notes: 'Notes (optional)', phNotes: 'Briefly describe the issue...', submit: 'Send booking on WhatsApp', hint: "We'll reply right away to confirm",
       msg: (d: any) => `Hello El Sayed Hassan Auto 👋\n${d.code ? `New booking ${d.code} 🚗` : "I'd like to book a visit 🚗"}\n\nName: ${d.name}${d.phone ? `\nMobile: ${d.phone}` : ''}\nCar: Nissan ${d.model}\nService: ${d.service}\nAppointment: ${d.date}${d.notes ? `\nNotes: ${d.notes}` : ''}`,
     },
@@ -155,7 +156,7 @@ export const EN: Dict = {
     time: {
       h: 'Pick a day and time', day: 'Pick a day', slot: 'Pick a time', today: 'Today', tomorrow: 'Tomorrow',
       note: 'Each slot takes only 3 cars so we can give every car proper time — full slots close.',
-      groups: ['Morning', 'Afternoon', 'Evening'], full: 'Full', dayFull: 'Fully booked', pickDay: 'Pick a day first to see the available times', loading: 'Loading available times...',
+      groups: ['Morning', 'Afternoon', 'Evening'], full: 'Full', dayFull: 'Fully booked', dayOff: 'Day off', pickDay: 'Pick a day first to see the available times', loading: 'Loading available times...',
       left: (n: number) => (n === 1 ? '1 spot left' : `${n} spots left`),
     },
     info: { h: 'Your details', name: 'Name', phName: 'Your name', phone: 'Mobile number', notes: 'Notes (optional)', phNotes: 'Briefly describe the issue...', badPhone: 'Enter a valid Egyptian mobile number (11 digits)' },
@@ -173,7 +174,7 @@ export const EN: Dict = {
     tag: '— CONTACT US —', h: `Visit us or ${G('call us')}`, info: 'Contact details',
     addrL: 'Address', addr: 'Al-Mariouteya Ring Road exit, Faisal — opposite the new station — inside Four Seasons Towers, Giza',
     waL: 'WhatsApp booking (main number)', phL: 'Other number', hrL: 'Working hours',
-    hours: '10 AM to 10 PM — every day', open: 'Open now', closed: 'Closed now — opens at 10 AM', map: 'Open location',
+    hours: '10 AM to 10 PM — every day except Sunday', open: 'Open now', closed: 'Closed now — opens at 10 AM', closedSun: 'Closed today (Sunday) — opens tomorrow at 10 AM', map: 'Open location',
   },
   shop: {
     tag: '— PARTS & OILS —', h: `${G('Genuine')} parts for your car`, p: 'Genuine Nissan oils, filters and parts plus approved alternatives — order them or have us fit them.',
@@ -232,7 +233,7 @@ export const EN: Dict = {
     groups: [
       { id: 'booking', icon: 'cal', t: 'Booking & hours', items: [
         ['How do I book?', 'From the "Book" page on the site, or message us on WhatsApp at 01080941711 and we will set the nearest slot.'],
-        ['What are your working hours?', 'Open every day from 10 AM to 10 PM, 7 days a week.'],
+        ['What are your working hours?', 'Open every day from 10 AM to 10 PM, except Sunday (day off).'],
         ['Do I need to book in advance?', 'Booking is recommended so you do not wait, but we also accept walk-ins depending on how busy we are.'],
         ['How long will my car stay with you?', 'It depends on the work. Inspection takes about 10 minutes, and we tell you the expected time before we start.'],
       ] },
@@ -286,7 +287,7 @@ export const EN: Dict = {
     msg: (d: any) => `Hello El Sayed Hassan Auto 👋\nI'd like an exact quote\nCar: Nissan ${d.model}\nParts: ${d.parts}\n\nWork needed:\n${d.jobs}\n\nApproximate cost: ${d.total}`,
   },
   cpage: {
-    title: `${G('Contact')} us`, sub: 'Have a question or want to book? We are here every day from 10 AM to 10 PM.',
+    title: `${G('Contact')} us`, sub: 'Have a question or want to book? We are here from 10 AM to 10 PM every day except Sunday.',
     quick: [
       { icon: 'wa', t: 'WhatsApp', d: 'The fastest way to book and ask', cta: 'Send a message' },
       { icon: 'phone', t: 'Call us', d: 'Talk to us directly on the main line', cta: 'Call now' },
@@ -317,5 +318,5 @@ export const EN: Dict = {
       { icon: 'ac', t: 'Air conditioning', d: 'A/C and cooling' }, { icon: 'cpu', t: 'Electrical & diagnostics', d: 'Computer and sensors' },
     ] },
   },
-  footer: { about: 'A Nissan-only service center in Al-Mariouteya, Faisal — expertise, honesty, modern diagnostics and genuine parts.', services: 'Nissan services', links: 'Quick links', tools: 'Useful tools', contact: 'Contact us', wa: 'WhatsApp', tagline: 'Nissan specialists — Faisal, Giza', days: 'Daily', rights: '© 2026 El Sayed Hassan Auto — All rights reserved' },
+  footer: { about: 'A Nissan-only service center in Al-Mariouteya, Faisal — expertise, honesty, modern diagnostics and genuine parts.', services: 'Nissan services', links: 'Quick links', tools: 'Useful tools', contact: 'Contact us', wa: 'WhatsApp', tagline: 'Nissan specialists — Faisal, Giza', days: 'Every day except Sunday', rights: '© 2026 El Sayed Hassan Auto — All rights reserved' },
 };

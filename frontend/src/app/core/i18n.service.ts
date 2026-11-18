@@ -47,5 +47,10 @@ export class I18n {
     return this.isAr() ? `${s} ج.م` : `EGP ${s}`;
   }
 
+  /** Product price; 0 = no price set in the dashboard -> "ask for the price". */
+  productPrice(n: number): string {
+    return n > 0 ? this.price(n) : this.isAr() ? 'اسأل عن السعر' : 'Ask for the price';
+  }
+
   toggle() { this.use(this.isAr() ? 'en' : 'ar'); }
 }

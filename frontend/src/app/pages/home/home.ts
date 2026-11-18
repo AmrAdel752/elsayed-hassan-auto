@@ -26,9 +26,11 @@ export class Home {
   protected readonly i = inject(I18n);
   protected readonly site = SITE;
   protected readonly wa = waLink();
-  protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }];
+  protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 6, s: '/7' }, { n: 12, s: '' }];
   protected readonly models = SITE.models.map(m => m.toUpperCase());
   private readonly store = inject(CatalogStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
   /** Model links for the "about us" text section: "صيانة نيسان صني" → /models/sunny. */
   protected readonly modelLinks = computed(() => CAR_MODELS.map(m => ({
     slug: m.slug, label: this.i.dict().home.seo.model(this.i.isAr() ? MODEL_AR[m.name] ?? m.name : m.name),

@@ -92,6 +92,8 @@ import { Reveal } from '../../shared/reveal.directive';
 export class ModelDetails {
   protected readonly i = inject(I18n);
   private readonly store = inject(CatalogStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
   private readonly seo = inject(Seo);
   // item-specific <title>/description for this page
   private readonly seoFx = effect(() => { const m = this.car(); if (m) this.seo.set({

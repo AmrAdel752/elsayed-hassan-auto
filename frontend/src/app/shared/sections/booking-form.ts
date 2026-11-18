@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule, NgForm } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { I18n } from '../../core/i18n.service';
-import { SITE, waLink } from '../../core/site';
+import { SITE, isDayOff, waLink } from '../../core/site';
 import { BookingApi } from '../../core/booking-api';
 import { Icon } from '../icon';
 import { Reveal } from '../reveal.directive';
@@ -62,11 +62,14 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
             <input name="date" type="date" ngModel required [min]="today" [max]="maxDate" class="field" (ngModelChange)="pickDate($event, f)"></label>
           <label><span class="lbl">{{ i.t('home.bk.time') }}</span>
             <select name="hour" ngModel required class="field" [disabled]="!date()">
-              <option value="" disabled>{{ !date() ? i.t('home.bk.pickDate') : times().length ? i.t('common.choose') : i.t('home.bk.noTimes') }}</option>
+              <option value="" disabled>{{ !date() ? i.t('home.bk.pickDate') : times().length ? i.t('common.choose') : dayOff() ? i.t('home.bk.dayOff') : slotsState() === 'loading' ? i.t('load.wait') : slotsState() === 'error' ? i.t('load.fail') : i.t('home.bk.noTimes') }}</option>
               @for (t of times(); track t.h) {
                 <option [value]="t.h" [disabled]="t.left === 0">{{ fmtHour(t.h) }}{{ t.left === 0 ? ' — ' + i.t('home.bk.full') : '' }}</option>
               }
             </select>
+            @if (date() && slotsState() === 'error') {
+              <button type="button" class="mt-1.5 text-sm font-bold text-brand-red2 hover:underline" (click)="loadSlots()">{{ i.t('load.retry') }}</button>
+            }
           </label>
         </div>
         <label class="relative block"><span class="lbl">{{ i.t('home.bk.notes') }}</span>
@@ -96,8 +99,10 @@ export class BookingForm {
   protected readonly maxDate = iso(new Date(Date.now() + DAYS_AHEAD * 864e5));
 
   protected readonly date = signal('');
-  /** Places left per "yyyy-mm-dd|hour". undefined = not loaded yet, null = API unreachable (all hours offered). */
+  protected readonly dayOff = computed(() => !!this.date() && isDayOff(this.date()));
+  /** Places left per "yyyy-mm-dd|hour". undefined = not loaded yet, null = API unreachable (no hours offered, "try again"). */
   private readonly slots = signal<Map<string, number> | null | undefined>(undefined);
+  protected readonly slotsState = computed(() => { const s = this.slots(); return s === undefined ? 'loading' : s === null ? 'error' : 'ok'; });
   protected readonly sending = signal(false);
   protected readonly err = signal<'' | 'taken' | 'many' | 'generic'>('');
   protected readonly code = signal('');
@@ -105,12 +110,12 @@ export class BookingForm {
   /** Hours for the chosen day; past hours today are hidden. */
   protected readonly times = computed(() => {
     const d = this.date(), map = this.slots();
-    if (!d) return [];
+    if (!d || isDayOff(d) || !map) return [];   // Sunday: day off; no server answer: no times offered
     const now = new Date(), isToday = d === iso(now);
     const out: { h: number; left: number }[] = [];
     for (let h = OPEN; h < CLOSE; h++) {
       if (isToday && h <= now.getHours()) continue;
-      out.push({ h, left: map ? map.get(`${d}|${h}`) ?? 0 : 1 });
+      out.push({ h, left: map.get(`${d}|${h}`) ?? 0 });
     }
     return out;
   });
@@ -121,10 +126,15 @@ export class BookingForm {
     if (this.slots() === undefined) this.loadSlots();
   }
 
-  private loadSlots() {
+  private slotsBusy = false;
+  /** Free times are fetched as soon as the form appears, so they're ready by the time a day is picked. */
+  private readonly preload = this.loadSlots();
+  protected loadSlots() {
+    if (this.slotsBusy) return;
+    this.slotsBusy = true; this.slots.set(undefined);
     this.api.slots(DAYS_AHEAD + 1).subscribe({
-      next: days => this.slots.set(new Map(days.flatMap(d => d.hours.map(h => [`${d.date}|${h.hour}`, d.closed ? 0 : h.left] as const)))),
-      error: () => this.slots.set(null),
+      next: days => { this.slotsBusy = false; this.slots.set(new Map(days.flatMap(d => d.hours.map(h => [`${d.date}|${h.hour}`, d.closed ? 0 : h.left] as const)))); },
+      error: () => { this.slotsBusy = false; this.slots.set(null); },
     });
   }
 

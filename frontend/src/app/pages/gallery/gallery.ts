@@ -91,10 +91,12 @@ export class Gallery {
   protected readonly i = inject(I18n);
   protected readonly cats = ['all', 'workshop', 'work', 'cars'] as const;
   private readonly store = inject(GalleryStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
   protected readonly src = imgUrl;
   protected readonly beforeAfter = this.store.beforeAfter;
   /** "Real photos coming soon" only while every tile is still a drawn placeholder. */
-  protected readonly placeholders = computed(() => !this.store.items().some(g => g.img));
+  protected readonly placeholders = computed(() => this.store.items().length > 0 && !this.store.items().some(g => g.img));
   protected readonly cat = signal<string>('all');
   protected readonly open = signal<GalleryItem | null>(null);
   protected readonly list = computed(() => this.store.items().filter(g => this.cat() === 'all' || g.cat === this.cat()));

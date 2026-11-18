@@ -34,7 +34,7 @@ import { imgUrl } from '../core/media';
         <div class="mt-auto flex items-end justify-between gap-2 sm:gap-3">
           <div class="min-w-0">
             @if (p.oldPrice) { <s class="muted text-[11px] sm:text-xs block">{{ i.price(p.oldPrice) }}</s> }
-            <b class="text-base sm:text-xl font-black text-brand-red2 whitespace-nowrap">{{ i.price(p.price) }}</b>
+            <b class="text-base sm:text-xl font-black text-brand-red2 whitespace-nowrap">{{ i.productPrice(p.price) }}</b>
           </div>
           <a [href]="wa()" target="_blank" [attr.aria-label]="i.t('shop.order')"
              class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-xl grid place-items-center bg-[#25d366] text-white transition hover:scale-110 shadow-[0_8px_20px_-8px_rgba(37,211,102,.8)]">
@@ -54,5 +54,5 @@ export class ProductCard {
     return p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
   });
   protected readonly wa = computed(() =>
-    waLink(this.i.dict().shop.msg(this.i.l(this.product().name), this.i.price(this.product().price))));
+    waLink(this.i.dict().shop.msg(this.i.l(this.product().name), this.i.productPrice(this.product().price))));
 }

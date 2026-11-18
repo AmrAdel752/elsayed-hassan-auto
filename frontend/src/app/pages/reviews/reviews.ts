@@ -73,7 +73,10 @@ import { Reveal } from '../../shared/reveal.directive';
 })
 export class Reviews {
   protected readonly i = inject(I18n);
-  protected readonly all = inject(CatalogStore).reviews;
+  private readonly store = inject(CatalogStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
+  protected readonly all = this.store.reviews;
   protected readonly maps = SITE.maps;
   protected readonly svc = signal('all');
   protected readonly stars = signal(0);

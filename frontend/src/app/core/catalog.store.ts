@@ -1,47 +1,33 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
-import { forkJoin, timeout } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { CATEGORIES, Category, OFFERS, Offer, PRODUCTS, Product } from '../data/catalog';
-import { REVIEWS, Review } from '../data/reviews';
+import { Category, Offer, Product } from '../data/catalog';
+import { Review } from '../data/reviews';
+import { SNAPSHOT } from '../data/snapshot';
+import { Live, strip } from './live';
 
 /**
- * Categories, products, offers and customer reviews for the public pages.
- * Starts with the built-in data (data/catalog.ts) so pages render instantly and keep working if the
- * API is down, then swaps in the live data managed from the dashboard (one request set per visit).
+ * Categories, products, offers and customer reviews for the public pages. Shown instantly from the copy
+ * built into the site (data/snapshot.ts, rebuilt automatically after every dashboard change), then
+ * refreshed from the API in the background (see `Live`).
  */
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
   private readonly http = inject(HttpClient);
+  private readonly api = `${environment.apiUrl}/api`;
 
-  readonly categories = signal<Category[]>(CATEGORIES);
-  readonly products = signal<Product[]>(PRODUCTS);
-  readonly offers = signal<Offer[]>(OFFERS);
-  readonly reviews = signal<Review[]>(REVIEWS);
-  /** True once the API answered or failed, i.e. "not found" can be trusted. */
-  readonly ready = signal(false);
+  private readonly cats = new Live<Category[]>(this.http, `${this.api}/categories`, SNAPSHOT.categories);
+  private readonly prods = new Live<Product[]>(this.http, `${this.api}/products`, SNAPSHOT.products, r => r.map(strip));
+  private readonly offs = new Live<Offer[]>(this.http, `${this.api}/offers`, SNAPSHOT.offers, r => r.map(strip));
+  private readonly revs = new Live<Review[]>(this.http, `${this.api}/reviews`, SNAPSHOT.reviews, r => r.map(strip));
 
-  constructor() {
-    const api = `${environment.apiUrl}/api`;
-    forkJoin({
-      categories: this.http.get<Category[]>(`${api}/categories`),
-      products: this.http.get<Product[]>(`${api}/products`),
-      offers: this.http.get<Offer[]>(`${api}/offers`),
-      reviews: this.http.get<Review[]>(`${api}/reviews`),
-    }).pipe(timeout(10000)).subscribe({
-      next: r => {
-        // the API sends null for empty optional fields; the pages expect them to be absent
-        this.categories.set(r.categories);
-        this.products.set(r.products.map(strip));
-        this.offers.set(r.offers.map(strip));
-        this.reviews.set(r.reviews.map(strip));
-        this.ready.set(true);
-      },
-      error: () => this.ready.set(true),   // keep the built-in data
-    });
-  }
-}
+  readonly categories = this.cats.data.asReadonly();
+  readonly products = this.prods.data.asReadonly();
+  readonly offers = this.offs.data.asReadonly();
+  readonly reviews = this.revs.data.asReadonly();
+  /** True once the live products list arrived (or failed): a product missing from the built-in copy may be brand new. */
+  readonly productsSynced = this.prods.synced.asReadonly();
 
-function strip<T extends object>(o: T): T {
-  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== null)) as T;
+  /** Called when a page opens: check the server for anything newer (at most once a minute). */
+  refresh() { for (const l of [this.cats, this.prods, this.offs, this.revs]) l.refresh(); }
 }

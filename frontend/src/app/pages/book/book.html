@@ -87,6 +87,8 @@
           <!-- days: swipe row on phones, 7-column calendar from sm up -->
           @if (slots() === undefined) {
             <p class="mb-4 text-sm font-bold muted flex items-center gap-2" role="status"><span class="w-4 h-4 rounded-full border-2 border-brand-red border-t-transparent animate-spin"></span>{{ T.loading }}</p>
+          } @else if (slots() === null) {
+            <div class="mb-6"><app-load-state state="error" (retry)="slots.set(undefined); loadSlots()" /></div>
           }
           <h3 class="text-sm font-extrabold mb-3 flex items-center gap-2"><span class="w-6 h-6 rounded-full grid place-items-center bg-brand-red/10 text-brand-red2 text-xs">1</span>{{ T.day }}</h3>
           <div class="flex gap-2 overflow-x-auto snap-x -mx-4 px-4 pb-2 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-7 sm:overflow-visible [scrollbar-width:none] mb-7">
@@ -97,7 +99,7 @@
                       [class]="on ? 'border-brand-red bg-gradient-to-b from-brand-red2 to-brand-red text-white shadow-[0_10px_24px_-10px_rgba(220,47,54,.8)]' : 'border-zinc-200 dark:border-ink-600 bg-zinc-50 dark:bg-white/5'">
                 <small class="block text-[11px] font-bold truncate px-1" [class.muted]="!on">{{ d.label }}</small>
                 <b class="block text-2xl font-black leading-tight my-0.5">{{ d.d }}</b>
-                <small class="block text-[11px]" [class.muted]="!on">{{ d.full ? T.dayFull : d.wd }}</small>
+                <small class="block text-[11px]" [class.muted]="!on">{{ d.off ? T.dayOff : d.full ? T.dayFull : d.wd }}</small>
               </button>
             }
           </div>

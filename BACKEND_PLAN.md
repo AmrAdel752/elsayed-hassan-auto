@@ -92,6 +92,8 @@ Admin dashboard lives **inside the existing Angular app** under `/admin` (one pr
 - [x] **K5** Frontend `environment.ts` → API URL (already set), live booking test passed
 - [x] **K6** DB backups: Premium plan daily backups, kept 14 days. Dashboard uploads live in the site's `wwwroot/wwwroot/uploads` (never shipped in the publish package)
 
+- [x] **K7** Instant data: `npm run build` first runs `scripts/snapshot.mts` (live API → `src/app/data/snapshot.ts`, bundled), pages show it at once and refresh from the API in the background. The API calls the Cloudflare Pages deploy hook (`Cloudflare__DeployHookUrl` env var, secret) ~45s after dashboard changes to products / categories / offers / reviews / gallery, so the site rebuilds itself. API packages go in the git-ignored `deploy/` folder
+
 ## Later (optional)
 
 - Notify the owner of new bookings (WhatsApp/SMS/email)

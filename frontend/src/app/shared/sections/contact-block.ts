@@ -23,7 +23,7 @@ import { Reveal } from '../reveal.directive';
                 <br>
                 <span class="inline-flex items-center gap-2 mt-1.5 px-3.5 py-1 rounded-full text-[13px] font-bold"
                       [class]="open ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-brand-red/10 text-brand-red2'">
-                  <i class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></i>{{ i.t(open ? 'contact.open' : 'contact.closed') }}
+                  <i class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></i>{{ i.t(open ? 'contact.open' : closedKey) }}
                 </span>
               }
             </div>
@@ -41,8 +41,14 @@ export class ContactBlock {
   protected readonly i = inject(I18n);
   protected readonly site = SITE;
   protected readonly map = inject(DomSanitizer).bypassSecurityTrustResourceUrl(SITE.mapEmbed);
-  // open 10:00–22:00 Cairo time, every day
-  protected readonly open = (() => { const h = +new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo', hour: 'numeric', hour12: false }); return h >= 10 && h < 22; })();
+  // open 10:00–22:00 Cairo time, every day except Sunday (day off)
+  private readonly now = (() => {
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Cairo', hour: 'numeric', hour12: false, weekday: 'short' }).formatToParts(new Date());
+    return { h: +(p.find(x => x.type === 'hour')?.value ?? 0) % 24, sun: p.find(x => x.type === 'weekday')?.value === 'Sun' };
+  })();
+  protected readonly open = !this.now.sun && this.now.h >= 10 && this.now.h < 22;
+  /** Closed-now text: on Sunday say it's the day off. */
+  protected readonly closedKey = this.now.sun ? 'contact.closedSun' : 'contact.closed';
   protected readonly rows: { icon: string; label: string; value?: string; ltr?: string }[] = [
     { icon: 'pin', label: 'contact.addrL', value: 'contact.addr' },
     { icon: 'wa', label: 'contact.waL', ltr: '0108 094 1711' },

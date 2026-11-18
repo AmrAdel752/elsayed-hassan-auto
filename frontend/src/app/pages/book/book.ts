@@ -1,24 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { I18n } from '../../core/i18n.service';
-import { SITE, waLink } from '../../core/site';
+import { SITE, isDayOff, waLink } from '../../core/site';
 import { PageBanner } from '../../shared/page-banner';
+import { LoadStateView } from '../../shared/load-state';
 import { Icon } from '../../shared/icon';
-import { saveBooking, savedInSlot } from '../../data/tracking';
+import { saveBooking } from '../../data/tracking';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { BookingApi, SlotDay } from '../../core/booking-api';
 
-interface Day { iso: string; label: string; wd: string; d: number; full: boolean; }
+interface Day { iso: string; label: string; wd: string; d: number; full: boolean; off: boolean; }
 
 const OPEN = 10, CLOSE = 22;
 /** Max cars per time slot; a slot with this many bookings is closed. */
-const CAP = 3;
 const pad = (n: number) => String(n).padStart(2, '0');
 
 @Component({
   selector: 'app-book',
-  imports: [FormsModule, PageBanner, Icon],
+  imports: [FormsModule, PageBanner, Icon, LoadStateView],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './book.html',
 })
@@ -54,7 +54,7 @@ export class Book implements OnInit {
 
   /**
    * Places left per "yyyy-mm-dd|hour" from the API.
-   * undefined = loading, null = API unreachable (falls back to the offline estimate below).
+   * undefined = loading, null = API unreachable (no times offered; "try again" shown).
    */
   protected readonly slots = signal<Map<string, number> | null | undefined>(undefined);
   protected readonly sending = signal(false);
@@ -76,7 +76,7 @@ export class Book implements OnInit {
       const d = new Date(); d.setDate(d.getDate() + k);
       const iso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
       out.push({
-        iso, full: this.hours.every(h => this.left(iso, h) === 0),
+        iso, full: this.hours.every(h => this.left(iso, h) === 0), off: isDayOff(iso),
         label: k === 0 ? this.i.t('book.time.today') : k === 1 ? this.i.t('book.time.tomorrow') : d.toLocaleDateString(loc, { weekday: 'short' }),
         wd: d.toLocaleDateString(loc, { month: 'short' }), d: d.getDate(),
       });
@@ -113,20 +113,12 @@ export class Book implements OnInit {
     });
   }
 
-  /**
-   * Free places left in a slot (0 = closed). From the API when it's reachable; otherwise an offline
-   * estimate: past hours today are closed, a stable pseudo-random number are taken, plus bookings made here.
-   */
+  /** Free places left in a slot (0 = closed / full / past / day off). Server data only: nothing is offered until it answers. */
   protected left(iso: string, h: number) {
-    const map = this.slots();
-    if (map) return map.get(`${iso}|${h}`) ?? 0;
-    if (map === undefined) return 0;   // still loading
-    const now = new Date(), today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    if (iso === today && h <= now.getHours()) return 0;
-    const seed = [...iso].reduce((a, c) => a * 31 + c.charCodeAt(0), 0) + h * 5;
-    const mock = [0, 1, 0, 2, 0, 3, 1, 0, 0][Math.abs(seed) % 9];
-    return Math.max(0, CAP - mock - savedInSlot(iso, h));
+    if (isDayOff(iso)) return 0;   // Sunday: day off
+    return this.slots()?.get(`${iso}|${h}`) ?? 0;
   }
+
 
   protected pickModel(m: string) { if (m !== this.model()) { this.model.set(m); this.gen.set(''); } }
 

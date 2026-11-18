@@ -11,6 +11,9 @@ export const SITE = {
   generations: { Sunny: ['N16', 'N17'], Qashqai: ['J10', 'J11', 'J12'], Juke: ['F15', 'F16'], Tiida: ['C11', 'C12'] } as Record<string, string[]>,
 };
 
+/** Weekly day off: Sunday. `iso` = "yyyy-mm-dd". */
+export const isDayOff = (iso: string) => new Date(`${iso}T12:00:00Z`).getUTCDay() === 0;
+
 /**
  * WhatsApp chat link. Uses api.whatsapp.com/send instead of the wa.me short link: wa.me's redirect
  * breaks emoji (👋 🚗 arrive as "�") on some WhatsApp apps, notably WhatsApp Web / Desktop.

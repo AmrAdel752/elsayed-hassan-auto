@@ -101,5 +101,5 @@ import { CountUp } from '../../shared/count-up.directive';
 })
 export class About {
   protected readonly i = inject(I18n);
-  protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 7, s: '/7' }, { n: 12, s: '' }, { n: SITE.models.length, s: '+' }];
+  protected readonly stats = [{ n: 15, s: '+' }, { n: 100, s: '%' }, { n: 6, s: '/7' }, { n: 12, s: '' }, { n: SITE.models.length, s: '+' }];
 }

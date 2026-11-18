@@ -43,6 +43,7 @@ builder.Services.AddAppJwt(builder.Configuration);
 builder.Services.AddAdminPolicies();   // [Authorize] on /api/admin/* via AdminControllerBase
 
 builder.Services.AddUploads(builder.Configuration);   // product / offer images, served from /uploads
+builder.Services.AddSiteRebuild();   // rebuild the website (Cloudflare deploy hook) after dashboard content changes
 
 builder.Services.AddRouting(o => o.LowercaseUrls = true);   // /api/admin/me, not /api/admin/Me
 builder.Services.AddControllers()
@@ -68,6 +69,7 @@ app.UseCors(CorsPolicy);
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSiteRebuild();
 
 app.MapHealthChecks("/health");
 app.MapControllers();

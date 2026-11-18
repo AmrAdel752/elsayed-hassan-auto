@@ -65,6 +65,15 @@
 /* visible ring for keyboard users only */
 :focus-visible { outline: 3px solid var(--color-brand-gold); outline-offset: 3px; border-radius: 6px; }
 .field:focus-visible { outline: none; }
+/* dashboard on/off option: checkbox + title + one-line explanation */
+.opt { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; border-radius: .9rem; border: 1px solid var(--color-zinc-300); cursor: pointer; }
+.dark .opt { border-color: var(--color-ink-600); }
+.opt:has(input:checked) { border-color: color-mix(in srgb, var(--color-brand-red) 55%, transparent); background: color-mix(in srgb, var(--color-brand-red) 6%, transparent); }
+.opt input { width: 1.25rem; height: 1.25rem; margin-top: .15rem; flex-shrink: 0; accent-color: #dc2f36; }
+.opt b { display: block; font-size: .9rem; }
+.opt small { display: block; font-size: .75rem; opacity: .7; margin-top: .15rem; line-height: 1.5; }
+/* a required field left empty after pressing Save */
+.field.bad { border-color: var(--color-brand-red2); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand-red) 15%, transparent); }
 
 /* "skip to content" link, shown when focused with Tab */
 .skip-link { position: fixed; top: -100px; inset-inline-start: 16px; z-index: 200; padding: 10px 18px; border-radius: 999px; background: var(--color-brand-red); color: #fff; font-weight: 700; transition: top .2s; }

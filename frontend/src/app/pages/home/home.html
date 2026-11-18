@@ -126,7 +126,8 @@
 <!-- booking -->
 <section id="book" class="py-14 md:py-28"><app-booking-form /></section>
 
-<!-- reviews -->
+<!-- reviews (only once the live reviews arrived) -->
+@if (reviews().length) {
 <section class="py-14 md:py-28 bg-gradient-to-b from-zinc-50 via-zinc-100 to-zinc-50 dark:from-ink-900 dark:via-ink-800 dark:to-ink-900">
   <div class="wrap">
     <div reveal class="sec-head"><span class="tag">{{ i.t('home.rv.tag') }}</span><h2 class="h2" [innerHTML]="i.t('home.rv.h')"></h2></div>
@@ -138,6 +139,7 @@
     </div>
   </div>
 </section>
+}
 
 <!-- who we are + what we fix, in plain text with links (this is the text search engines read) -->
 <section class="py-14 md:py-24 border-y border-zinc-200 dark:border-ink-600 bg-white dark:bg-ink-800">

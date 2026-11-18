@@ -1,32 +1,24 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
-import { timeout } from 'rxjs';
+import { Injectable, computed, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BEFORE_AFTER, BeforeAfter, GALLERY, GalleryItem } from '../data/gallery';
+import { BeforeAfter, GalleryItem } from '../data/gallery';
+import { SNAPSHOT } from '../data/snapshot';
+import { Live, strip } from './live';
+
+type GalleryResponse = { items: GalleryItem[]; beforeAfter: BeforeAfter[] };
 
 /**
- * Gallery tiles + before/after pairs for the public gallery page.
- * Starts with the built-in data (data/gallery.ts) so the page renders instantly and keeps working if the
- * API is down, then swaps in what the dashboard manages. Created on the first visit to the gallery page.
+ * Gallery tiles + before/after pairs for the public gallery page. Shown instantly from the copy built into
+ * the site (data/snapshot.ts), then refreshed from the API in the background (see `Live`).
  */
 @Injectable({ providedIn: 'root' })
 export class GalleryStore {
-  readonly items = signal<GalleryItem[]>(GALLERY);
-  readonly beforeAfter = signal<BeforeAfter[]>(BEFORE_AFTER);
+  private readonly live = new Live<GalleryResponse>(inject(HttpClient), `${environment.apiUrl}/api/gallery`, SNAPSHOT.gallery,
+    r => ({ items: r.items.map(strip), beforeAfter: r.beforeAfter.map(strip) }));
 
-  constructor() {
-    inject(HttpClient).get<{ items: GalleryItem[]; beforeAfter: BeforeAfter[] }>(`${environment.apiUrl}/api/gallery`)
-      .pipe(timeout(10000)).subscribe({
-        next: r => {
-          // the API sends null for empty optional fields; the page expects them to be absent
-          this.items.set(r.items.map(strip));
-          this.beforeAfter.set(r.beforeAfter.map(strip));
-        },
-        error: () => {},   // keep the built-in data
-      });
-  }
-}
+  readonly items = computed(() => this.live.data().items);
+  readonly beforeAfter = computed(() => this.live.data().beforeAfter);
 
-function strip<T extends object>(o: T): T {
-  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== null)) as T;
+  /** Called when the page opens: check the server for anything newer (at most once a minute). */
+  refresh() { this.live.refresh(); }
 }

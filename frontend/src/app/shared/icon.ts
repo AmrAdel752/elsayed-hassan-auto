@@ -24,6 +24,7 @@ const ICONS: Record<string, string> = {
   tag: S('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1.5"/>'),
   car: S('<path d="M5 17H3v-5l2-5h11l3 5h2v5h-2"/><path d="M9 17h6M5 12h14"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>'),
   arrow: S('<path d="M5 12h14m-6-6 6 6-6 6"/>'),
+  chevron: S('<path d="m6 9 6 6 6-6"/>'),
   sun: S('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
   moon: S('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'),
   menu: S('<path d="M4 6h16M4 12h16M4 18h16"/>'),

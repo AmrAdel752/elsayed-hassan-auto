@@ -45,6 +45,8 @@ import { Reveal } from '../../shared/reveal.directive';
 export class Offers {
   protected readonly i = inject(I18n);
   private readonly store = inject(CatalogStore);
+  /** Check the server for anything newer than the built-in copy. */
+  private readonly refreshFx = this.store.refresh();
   protected readonly offers = computed(() => this.store.offers().filter(o => new Date(o.endsAt).getTime() > Date.now()));
   protected readonly sale = computed(() => this.store.products().filter(p => p.oldPrice));
 }
